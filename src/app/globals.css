@@ -1,0 +1,194 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 0 0% 9%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 9%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 9%;
+
+    --primary: 0 0% 9%;
+    --primary-foreground: 0 0% 98%;
+
+    --secondary: 0 0% 96%;
+    --secondary-foreground: 0 0% 9%;
+
+    --muted: 0 0% 96%;
+    --muted-foreground: 0 0% 45%;
+
+    --accent: 0 0% 96%;
+    --accent-foreground: 0 0% 9%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 0 0% 90%;
+    --input: 0 0% 90%;
+    --ring: 0 0% 9%;
+
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    --background: 0 0% 7%;
+    --foreground: 0 0% 98%;
+
+    --card: 0 0% 7%;
+    --card-foreground: 0 0% 98%;
+
+    --popover: 0 0% 7%;
+    --popover-foreground: 0 0% 98%;
+
+    --primary: 0 0% 98%;
+    --primary-foreground: 0 0% 9%;
+
+    --secondary: 0 0% 15%;
+    --secondary-foreground: 0 0% 98%;
+
+    --muted: 0 0% 15%;
+    --muted-foreground: 0 0% 64%;
+
+    --accent: 0 0% 15%;
+    --accent-foreground: 0 0% 98%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 0 0% 15%;
+    --input: 0 0% 15%;
+    --ring: 0 0% 84%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+.reel {
+  background-position: 0 90px;
+}
+
+/* Level7.module.css */
+
+.slotMachine {
+  display: flex;
+  justify-content: space-between;
+  width: 64px;
+  /* Adjust the width as needed */
+  height: 224px;
+  /* Adjust the height as needed */
+}
+
+.column {
+  flex: 1;
+  border: 1px solid #000;
+}
+
+.leftColumn {
+  background-image: url("/leftcol.png");
+  background-size: cover;
+  background-repeat: repeat-y;
+}
+
+.rightColumn {
+  background-image: url("/rightcol.png");
+  background-size: cover;
+  background-repeat: repeat-y;
+}
+
+.spin-left {
+  animation: spinLeft 2s linear infinite;
+  /* Adjust the duration and timing function as needed */
+}
+
+.spin-right {
+  animation: spinRight 1.9s linear infinite;
+  /* Adjust the duration and timing function as needed */
+}
+
+@keyframes spinLeft {
+  0% {
+    background-position: 0 0;
+  }
+
+  100% {
+    background-position: 0 -14rem;
+    /* Adjust the final position based on the image height */
+  }
+}
+
+@keyframes spinRight {
+  0% {
+    background-position: 0 0;
+  }
+
+  100% {
+    background-position: 0 14rem;
+    /* Adjust the final position based on the image height */
+  }
+}
+
+.spin-leftN {
+  animation: spinLeftN 3s linear infinite;
+  /* Adjust the duration and timing function as needed */
+}
+
+.spin-rightN {
+  animation: spinRightN 2.9s linear infinite;
+  /* Adjust the duration and timing function as needed */
+}
+
+@keyframes spinLeftN {
+  0% {
+    background-position: 0 0;
+  }
+
+  100% {
+    background-position: 0 -15rem;
+    /* Adjust the final position based on the image height */
+  }
+}
+
+@keyframes spinRightN {
+  0% {
+    background-position: 0 0;
+  }
+
+  100% {
+    background-position: 0 15rem;
+    /* Adjust the final position based on the image height */
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin {
+  animation: spin 3s linear infinite; /* You can adjust the duration and timing function as needed */
+}
+
+.spacer {
+  aspect-ratio: 540/960;
+  width: 100%;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
+}
