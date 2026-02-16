@@ -1,10 +1,11 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/solid";
 import { signIn } from "next-auth/react";
 import { motion } from "framer-motion";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 
 function Login() {
   const [email, setEmail] = useState("");
@@ -12,6 +13,17 @@ function Login() {
   const [error, setError] = useState(null);
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const searchParams = useSearchParams();
+
+  // Pick up error from URL query param (e.g. redirected back with ?error=CredentialsSignin)
+  useEffect(() => {
+    const urlError = searchParams.get("error");
+    if (urlError) {
+      setError("Invalid email or password. Please try again.");
+      // Clean the URL without reloading
+      window.history.replaceState({}, "", "/");
+    }
+  }, [searchParams]);
 
   const handleKeyPress = (e) => {
     if (e.key === "Enter") {
@@ -24,14 +36,19 @@ function Login() {
     setIsLoading(true);
 
     try {
-      await signIn("credentials", {
+      const result = await signIn("credentials", {
         email,
         password,
-        redirect: true,
-        callbackUrl: "/",
+        redirect: false,
       });
+
+      if (result?.error) {
+        setError("Invalid email or password. Please try again.");
+      } else if (result?.ok) {
+        window.location.href = "/";
+      }
     } catch (err) {
-      setError("Login failed. Please check your credentials.");
+      setError("Login failed. Please try again.");
     } finally {
       setIsLoading(false);
     }
