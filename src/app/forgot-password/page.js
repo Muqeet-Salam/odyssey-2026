@@ -2,7 +2,8 @@
 
 import React, { useState } from "react";
 import { sendPasswordResetEmail } from "firebase/auth";
-import { auth } from "../../../firebase";
+import { auth, database } from "../../../firebase";
+import { ref, get } from "firebase/database";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { ArrowLeftIcon } from "@heroicons/react/24/outline";
@@ -25,10 +26,31 @@ export default function ForgotPassword() {
     setStatus({ type: "", message: "" });
 
     try {
+      // Check if the email exists in the database first
+      const usersRef = ref(database, "/odysseyUsers");
+      const snapshot = await get(usersRef);
+      let emailExists = false;
+
+      if (snapshot.exists()) {
+        const users = snapshot.val();
+        emailExists = Object.values(users).some(
+          (user) => user.email?.toLowerCase() === email.trim().toLowerCase()
+        );
+      }
+
+      if (!emailExists) {
+        setStatus({
+          type: "error",
+          message: "No account found with this email address.",
+        });
+        setIsLoading(false);
+        return;
+      }
+
       await sendPasswordResetEmail(auth, email);
       setStatus({
         type: "success",
-        message: "Password reset email sent. Please check your inbox.",
+        message: "Password reset email sent. Please check your inbox. If you don't see it, check your spam folder.",
       });
       setEmail("");
     } catch (error) {
