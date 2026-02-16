@@ -18,6 +18,28 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              if (typeof window !== 'undefined') {
+                window.addEventListener('error', function(e) {
+                  if (
+                    e.message && (
+                      e.message.includes('ChunkLoadError') ||
+                      e.message.includes('Loading chunk') ||
+                      e.message.includes('Failed to fetch')
+                    )
+                  ) {
+                    console.warn('Chunk load failed, reloading...');
+                    window.location.reload();
+                  }
+                });
+              }
+            `,
+          }}
+        />
+      </head>
       <body className={jetBrains_mono.className}>
         <SessionProvider>
           <ThemeProvider
