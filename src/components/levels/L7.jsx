@@ -368,20 +368,10 @@ const Level7 = ({ onComplete }) => {
               </div>
 
               <h3 className="text-xl font-bold mb-2 text-gray-800 dark:text-[#F9DC34]">
-                Setup:
-              </h3>
-              <div className="space-y-1 mb-4 text-gray-600 dark:text-gray-300 text-sm">
-                <p>• The terminal says: <em>"Login restricted to working hours."</em></p>
-                <p>• Working Hours: <strong>09:00 – 17:00</strong></p>
-                <p>• Current Time: <strong>02:00</strong> (outside working hours)</p>
-                <p>• A settings option is available on the terminal.</p>
-              </div>
-
-              <h3 className="text-xl font-bold mb-2 text-gray-800 dark:text-[#F9DC34]">
                 Hint:
               </h3>
               <p className="text-gray-600 dark:text-gray-300 italic">
-                Can you control the time??
+                Time is a cage; use the gears to shift the sun.
               </p>
             </div>
 

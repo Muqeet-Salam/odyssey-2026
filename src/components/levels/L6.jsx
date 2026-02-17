@@ -236,22 +236,11 @@ const Level6 = ({ onComplete }) => {
               </div>
 
               <h3 className="text-xl font-bold mb-2 text-gray-800 dark:text-[#F9DC34]">
-                Rules:
-              </h3>
-
-              <div className="space-y-2 mb-4 text-gray-600 dark:text-gray-300 text-sm">
-                <p>• Analyze the circuit carefully</p>
-                <p>• Convert the sequence into its numeric form</p>
-                <p>• Submit the final number</p>
-
-              </div>
-
-              <h3 className="text-xl font-bold mb-2 text-gray-800 dark:text-[#F9DC34]">
                 Hint:
               </h3>
 
               <p className="text-gray-600 dark:text-gray-300 italic">
-              Compute its integer representation
+                Power flows where the bits align. Sum the values of the lit paths.
               </p>
             </div>
 
