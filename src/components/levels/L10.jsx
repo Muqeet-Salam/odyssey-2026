@@ -477,7 +477,7 @@ const Level10 = ({ onComplete }) => {
                 fontWeight="bold"
                 style={{ filter: 'drop-shadow(2px 2px 3px rgba(0,0,0,0.5))' }}
               >
-                GAME OVER! 💀
+                GAME OVER!
               </text>
               <text
                 x="200"
@@ -668,7 +668,7 @@ const Level10 = ({ onComplete }) => {
                 Hint:
               </h3>
               <p className="text-gray-600 dark:text-gray-300 italic">
-                Sometimes you have to bring something back to make progress.
+                A cycle of three, but only one can sail. A return journey may clear the path.
               </p>
             </div>
 
