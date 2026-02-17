@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import { Input } from "@/components/ui/input";
 import { motion, AnimatePresence } from "framer-motion";
@@ -19,20 +19,8 @@ const Level22 = ({ onComplete }) => {
     const [roomEntered, setRoomEntered] = useState(false);
     const [bulbTemp, setBulbTemp] = useState(0); // 0 to 100
     const [targetSwitch, setTargetSwitch] = useState(null);
-    const [gameLog, setGameLog] = useState([
-        "=== THE LIGHT BULB CHALLENGE ===",
-        "You're standing in a hallway with 3 switches (A, B, C).",
-        "One of them controls a light bulb in a sealed room.",
-        "You can flip switches as many times as you want.",
-        "But once you /enter_room, the door LOCKS and you can't touch the switches.",
-        "Your goal: figure out WHICH switch (A, B, or C) controls the bulb.",
-        "",
-        "Tip: The bulb gives off HEAT when it's been on. Use /wait to let time pass.",
-        "Then /enter_room and check if the bulb is lit, warm, or cold.",
-    ]);
 
     const { toast } = useToast();
-    const logEndRef = useRef(null);
 
     // Initialize random target switch
     useEffect(() => {
@@ -42,10 +30,7 @@ const Level22 = ({ onComplete }) => {
         console.log("Target Switch (Debug):", randomTarget);
     }, []);
 
-    // Auto-scroll log
-    useEffect(() => {
-        logEndRef.current?.scrollIntoView({ behavior: "smooth" });
-    }, [gameLog]);
+
 
     useEffect(() => {
         if (isSuccess) {
@@ -61,7 +46,18 @@ const Level22 = ({ onComplete }) => {
     }, [isSuccess, onComplete, toast]);
 
     const addLog = (msg) => {
-        setGameLog(prev => [...prev, msg]);
+        if (msg.includes("[LOCKED]") || msg.includes("Invalid")) {
+            toast({
+                title: "Action Failed",
+                description: msg.replace(/^> /, ""),
+                variant: "destructive"
+            });
+        } else if (msg.includes("Waiting")) {
+            toast({
+                title: "Time Passing...",
+                description: msg.replace(/^> /, ""),
+            });
+        }
     };
 
     const handleInputChange = (e) => {
@@ -288,27 +284,10 @@ const Level22 = ({ onComplete }) => {
                     )}
                 </motion.div>
 
-                {/* Game Log */}
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.3 }}
-                    className="flex flex-col max-h-[200px] w-full"
-                >
-                    <div className="bg-black/40 rounded-xl border border-gray-700/30 p-4 overflow-y-auto font-mono text-sm shadow-inner min-h-[100px]">
-                        {gameLog.map((log, i) => (
-                            <div key={i} className={`mb-1.5 ${log.startsWith("> ALERT") ? "text-red-400" : log.startsWith("> CORRECT") ? "text-green-400" : "text-gray-300"}`}>
-                                {log}
-                            </div>
-                        ))}
-                        <div ref={logEndRef} />
-                    </div>
-                </motion.div>
-            </div>
 
-            {/* Sticky Command Panel */}
-            <div className="sticky bottom-0 left-0 right-0 z-40 border-t border-gray-500/20 py-4 mt-8">
-                <div className="flex flex-col items-center gap-3 max-w-4xl mx-auto px-4">
+
+                {/* Command Panel */}
+                <div className="flex flex-col items-center gap-3 w-full max-w-md mx-auto mt-2">
                     <motion.span
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
@@ -328,7 +307,7 @@ const Level22 = ({ onComplete }) => {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.6, delay: 0.6 }}
-                        className="flex gap-2 w-full max-w-md"
+                        className="flex gap-2 w-full"
                     >
                         <Input
                             type="text"
@@ -411,6 +390,18 @@ const Level22 = ({ onComplete }) => {
                                         Show available commands and hints.
                                     </p>
                                 </div>
+                            </div>
+
+                            <h3 className="text-xl font-bold mb-2 text-gray-800 dark:text-[#F9DC34]">
+                                How to solve:
+                            </h3>
+                            <div className="bg-gray-50 dark:bg-gray-900/20 p-4 rounded-lg border-l-4 border-blue-500 mb-6">
+                                <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
+                                    You&apos;re standing in a hallway with 3 switches (A, B, C). One of them controls a light bulb in a sealed room.<br className="mb-2" />
+                                    You can flip switches as many times as you want. But once you <span className="font-mono text-[#F5A623]">/enter_room</span>, the door LOCKS and you can&apos;t touch the switches.<br className="mb-2" />
+                                    <strong>Your goal:</strong> figure out WHICH switch (A, B, or C) controls the bulb.<br className="mb-2" />
+                                    <strong>Tip:</strong> The bulb gives off HEAT when it&apos;s been on. Use <span className="font-mono text-[#F5A623]">/wait</span> to let time pass. Then /enter_room and check if the bulb is lit, warm, or cold.
+                                </p>
                             </div>
 
                             <h3 className="text-xl font-bold mb-2 text-gray-800 dark:text-[#F9DC34]">
