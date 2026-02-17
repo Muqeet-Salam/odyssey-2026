@@ -253,7 +253,7 @@ const Level17 = ({ onComplete }) => {
             const col = leftIdx % perRow;
             const totalInRow = Math.min(perRow, leftPan.length - row * perRow);
             const startX = 80 - (totalInRow * spacing) / 2;
-            return { x: startX + col * spacing, y: 112 + row * spacing, onScale: true, side: "left" };
+            return { x: startX + col * spacing, y: 127 + row * spacing, onScale: true, side: "left" };
         }
 
         if (rightIdx !== -1) {
@@ -262,7 +262,7 @@ const Level17 = ({ onComplete }) => {
             const col = rightIdx % perRow;
             const totalInRow = Math.min(perRow, rightPan.length - row * perRow);
             const startX = 300 - (totalInRow * spacing) / 2;
-            return { x: startX + col * spacing, y: 112 + row * spacing, onScale: true, side: "right" };
+            return { x: startX + col * spacing, y: 127 + row * spacing, onScale: true, side: "right" };
         }
 
         const groundCoins = [];
@@ -324,15 +324,15 @@ const Level17 = ({ onComplete }) => {
                         style={{ originX: "190px", originY: "100px" }}
                     >
                         <rect x="45" y="96" width="290" height="7" rx="3" fill="#8D6E63" />
-                        <line x1="65" y1="103" x2="55" y2="130" stroke="#A1887F" strokeWidth="1.5" />
-                        <line x1="95" y1="103" x2="105" y2="130" stroke="#A1887F" strokeWidth="1.5" />
-                        <ellipse cx="80" cy="133" rx="35" ry="8" fill="#8D6E63" stroke="#6D4C41" strokeWidth="1" />
-                        <text x="80" y="148" textAnchor="middle" fontSize="9" fill="#BCAAA4">LEFT</text>
+                        <line x1="65" y1="103" x2="55" y2="145" stroke="#A1887F" strokeWidth="2" />
+                        <line x1="95" y1="103" x2="105" y2="145" stroke="#A1887F" strokeWidth="2" />
+                        <ellipse cx="80" cy="148" rx="45" ry="10" fill="#8D6E63" stroke="#6D4C41" strokeWidth="1.5" />
+                        <text x="80" y="165" textAnchor="middle" fontSize="9" fill="#BCAAA4">LEFT</text>
 
-                        <line x1="285" y1="103" x2="275" y2="130" stroke="#A1887F" strokeWidth="1.5" />
-                        <line x1="315" y1="103" x2="325" y2="130" stroke="#A1887F" strokeWidth="1.5" />
-                        <ellipse cx="300" cy="133" rx="35" ry="8" fill="#8D6E63" stroke="#6D4C41" strokeWidth="1" />
-                        <text x="300" y="148" textAnchor="middle" fontSize="9" fill="#BCAAA4">RIGHT</text>
+                        <line x1="285" y1="103" x2="275" y2="145" stroke="#A1887F" strokeWidth="2" />
+                        <line x1="315" y1="103" x2="325" y2="145" stroke="#A1887F" strokeWidth="2" />
+                        <ellipse cx="300" cy="148" rx="45" ry="10" fill="#8D6E63" stroke="#6D4C41" strokeWidth="1.5" />
+                        <text x="300" y="165" textAnchor="middle" fontSize="9" fill="#BCAAA4">RIGHT</text>
 
                         {leftPan.map((coinNum, i) => {
                             const pos = getCoinPosition(coinNum);
