@@ -427,7 +427,7 @@ const Level1 = ({ onComplete }) => {
                 Hint:
               </h3>
               <p className="text-gray-600 dark:text-gray-300 italic">
-                Use the color gradient to sort. Deep Purple belongs at the top (C, O); Bright Pink belongs at the bottom (S, C).
+                Colors cascade from the deep violet skies to the rose-lit earth. Find the order in the bloom.
               </p>
             </div>
 

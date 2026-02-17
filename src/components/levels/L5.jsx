@@ -415,14 +415,12 @@ const Level5 = ({ onComplete }) => {
                 </div>
               </div>
 
-              <h3 className="text-xl font-bold mb-2 text-gray-800 dark:text-[#F9DC34]">
-                Setup:
+              <h3 className="text-xl font-bold mb-2 text-gray-800 dark:text-[#F9DC34]">                
+                Hint:
               </h3>
-              <div className="space-y-1 mb-4 text-gray-600 dark:text-gray-300 text-sm">
-                <p>• A drawer has a keypad requiring a <strong>4-digit PIN</strong>.</p>
-                <p>• On the table is a desk calendar opened to a single marked date.</p>
-                <p>• A sticky note beside it reads: <em>"Don't forget the big day."</em></p>
-              </div>
+              <p className="text-gray-600 dark:text-gray-300 italic">
+                The calendar holds the key to the 'big day'.
+              </p>
 
             </div>
 

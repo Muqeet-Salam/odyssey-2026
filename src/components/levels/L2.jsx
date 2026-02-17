@@ -46,6 +46,9 @@ const Level2 = ({ onComplete }) => {
 
   const handleThemeChange = async (mode) => {
     if (sunAnimating) return;
+    if ((mode === "dark" && isDarkScene) || (mode === "light" && !isDarkScene)) {
+      return;
+    }
     setSunAnimating(true);
     setHasObserved(true);
 
@@ -220,12 +223,12 @@ const Level2 = ({ onComplete }) => {
         {isSunflower ? (
           <motion.g
             animate={sunflowerControls}
-            style={{ originX: `${flower.x}px`, originY: `${groundY - stemHeight}px` }}
+            style={{ transformBox: "fill-box", transformOrigin: "center" }}
           >
             {/* Sunflower petals — animate scale to close/open */}
             <motion.g
               animate={petalControls}
-              style={{ originX: `${flower.x}px`, originY: `${groundY - stemHeight}px` }}
+              style={{ transformBox: "fill-box", transformOrigin: "center" }}
             >
               {[...Array(10)].map((_, i) => (
                 <ellipse
@@ -543,7 +546,7 @@ const Level2 = ({ onComplete }) => {
                 Hint:
               </h3>
               <p className="text-gray-600 dark:text-gray-300 italic">
-                Toggle themes and observe — one flower follows the light.
+                It seeks the eye that burns in the sky.
               </p>
             </div>
 

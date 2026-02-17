@@ -443,20 +443,13 @@ const Level3 = ({ levelNumber = 1, onComplete, nextLevelNumber = 2 }) => {
                 </div>
               </div>
 
-              <h3 className="text-xl font-bold mb-2 text-gray-800 dark:text-[#F9DC34]">
-                Rules:
-              </h3>
-              <div className="space-y-1 mb-4 text-gray-600 dark:text-gray-300 text-sm">
-                <p>• 3 lights on the ceiling point in different directions.</p>
-                <p>• If <strong>any</strong> light beam touches the door, it stays <strong>locked</strong>.</p>
-                <p>• Rotate all lights so <strong>none</strong> hit the door to unlock it.</p>
-              </div>
+              
 
               <h3 className="text-xl font-bold mb-2 text-gray-800 dark:text-[#F9DC34]">
                 Hint:
               </h3>
               <p className="text-gray-600 dark:text-gray-300 italic">
-                Overlap the dark to remove it. When all beams point away, the door is free.
+                Shadows tell no tales, but the light must look elsewhere.
               </p>
             </div>
 

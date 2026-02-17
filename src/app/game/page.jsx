@@ -10,19 +10,19 @@ import {
   getIndianEpochTimeFromWorldTimeAPI,
   levelScore,
 } from "@/lib/utils";
-/*
 import { staticData } from "@/lib/staticdata";
 import Level1 from "@/components/levels/L1";
 import Level2 from "@/components/levels/L2";
 import Level3 from "@/components/levels/L3";
 import Level4 from "@/components/levels/L4";
 import Level5 from "@/components/levels/L5";
+/*
 import Level6 from "@/components/levels/L6";
 import Level7 from "@/components/levels/L7";
 import Level8 from "@/components/levels/L8";
 import Level9 from "@/components/levels/L9";
 import Level10 from "@/components/levels/L10";
-
+*/
 
 const levels = [
   Level1,
@@ -30,13 +30,15 @@ const levels = [
   Level3,
   Level4,
   Level5,
+  /*
   Level6,
   Level7,
   Level8,
   Level9,
   Level10,
+  */
 ];
-*/
+
 const Game = () => {
   const { data: session, status } = useSession();
   const [loading, setLoading] = useState(true);
