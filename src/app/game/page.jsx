@@ -22,10 +22,6 @@ import Level8 from "@/components/levels/L8";
 import Level9 from "@/components/levels/L9";
 import Level10 from "@/components/levels/L10";
 import Level11 from "@/components/levels/L11";
-import Level12 from "@/components/levels/L12";
-import Level13 from "@/components/levels/L13";
-import Level14 from "@/components/levels/L14";
-import Level15 from "@/components/levels/L15";
 import Level16 from "@/components/levels/L16";
 import Level17 from "@/components/levels/L17";
 import Level18 from "@/components/levels/L18";
@@ -46,10 +42,6 @@ const levels = [
   Level9,
   Level10,
   Level11,
-  Level12,
-  Level13,
-  Level14,
-  Level15,
   Level16,
   Level17,
   Level18,

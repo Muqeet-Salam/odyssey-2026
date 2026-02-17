@@ -219,7 +219,7 @@ const Level22 = ({ onComplete }) => {
                 transition={{ duration: 0.6 }}
                 className="px-6 py-3 text-2xl font-bold text-[#1A1A1A] dark:text-[#111111] bg-gradient-to-r from-[#F9DC34] to-[#F5A623] rounded-full shadow-lg"
             >
-                Level 22
+                Level 17
             </motion.h1>
 
             <motion.p

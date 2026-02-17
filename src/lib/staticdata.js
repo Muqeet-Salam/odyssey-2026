@@ -1,4 +1,4 @@
-const maxLevel = 21;
+const maxLevel = 17;
 const startTimes = {
   1: 1771308000,
   2: 1771308000,
@@ -29,16 +29,12 @@ const levelWeightage = {
   9: 4,
   10: 4,
   11: 4,
-  12: 3,
-  13: 4,
-  14: 4,
-  15: 4,
+  12: 5,
+  13: 5,
+  14: 5,
+  15: 5,
   16: 5,
-  17: 5,
-  18: 5,
-  19: 5,
-  20: 5,
-  21: 5
+  17: 5
 };
 
 export const staticData = {
