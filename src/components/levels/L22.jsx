@@ -19,7 +19,17 @@ const Level22 = ({ onComplete }) => {
     const [roomEntered, setRoomEntered] = useState(false);
     const [bulbTemp, setBulbTemp] = useState(0); // 0 to 100
     const [targetSwitch, setTargetSwitch] = useState(null);
-    const [gameLog, setGameLog] = useState(["System initialized.", "You are in the hallway.", "Switches A, B, and C are visible."]);
+    const [gameLog, setGameLog] = useState([
+        "=== THE LIGHT BULB CHALLENGE ===",
+        "You're standing in a hallway with 3 switches (A, B, C).",
+        "One of them controls a light bulb in a sealed room.",
+        "You can flip switches as many times as you want.",
+        "But once you /enter_room, the door LOCKS and you can't touch the switches.",
+        "Your goal: figure out WHICH switch (A, B, or C) controls the bulb.",
+        "",
+        "Tip: The bulb gives off HEAT when it's been on. Use /wait to let time pass.",
+        "Then /enter_room and check if the bulb is lit, warm, or cold.",
+    ]);
 
     const { toast } = useToast();
     const logEndRef = useRef(null);
@@ -407,7 +417,9 @@ const Level22 = ({ onComplete }) => {
                                 Hint:
                             </h3>
                             <p className="text-gray-600 dark:text-gray-300 italic">
-                                Light reveals what is on, but heat reveals what was on. Use time wisely before entering.
+                                Turn one switch ON and wait. Then turn it OFF, and turn a different switch ON.
+                                Enter the room. If the bulb is lit, it's the switch you left ON.
+                                If it's off but warm, it's the one you turned off. If it's cold, it's the third one.
                             </p>
                         </div>
 

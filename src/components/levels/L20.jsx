@@ -51,7 +51,7 @@ const Level20 = ({ onComplete }) => {
     useEffect(() => {
         if (isPlaying) {
             progressRef.current = setInterval(() => {
-                setProgress((p) => (p >= 100 ? 0 : p + 0.5));
+                setProgress((p) => (p >= 100 ? 0 : p + 0.047));
             }, 100);
         } else {
             clearInterval(progressRef.current);

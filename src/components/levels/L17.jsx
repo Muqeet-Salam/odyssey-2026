@@ -255,21 +255,21 @@ const Level17 = ({ onComplete }) => {
         const rightIdx = rightPan.indexOf(coinNum);
 
         if (leftIdx !== -1) {
-            const perRow = 4;
+            const perRow = 3;
             const row = Math.floor(leftIdx / perRow);
             const col = leftIdx % perRow;
             const totalInRow = Math.min(perRow, leftPan.length - row * perRow);
-            const startX = 80 - (totalInRow * 22) / 2;
-            return { x: startX + col * 22, y: 115 + row * 22, onScale: true, side: "left" };
+            const startX = 80 - (totalInRow * 18) / 2;
+            return { x: startX + col * 18, y: 115 + row * 18, onScale: true, side: "left" };
         }
 
         if (rightIdx !== -1) {
-            const perRow = 4;
+            const perRow = 3;
             const row = Math.floor(rightIdx / perRow);
             const col = rightIdx % perRow;
             const totalInRow = Math.min(perRow, rightPan.length - row * perRow);
-            const startX = 300 - (totalInRow * 22) / 2;
-            return { x: startX + col * 22, y: 115 + row * 22, onScale: true, side: "right" };
+            const startX = 300 - (totalInRow * 18) / 2;
+            return { x: startX + col * 18, y: 115 + row * 18, onScale: true, side: "right" };
         }
 
         const groundCoins = [];
