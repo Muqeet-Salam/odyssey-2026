@@ -213,6 +213,24 @@ const Level22 = ({ onComplete }) => {
 
     return (
         <div className="flex flex-col items-center mt-8 max-w-4xl mx-auto px-4 w-full">
+            <motion.h1
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6 }}
+                className="px-6 py-3 text-2xl font-bold text-[#1A1A1A] dark:text-[#111111] bg-gradient-to-r from-[#F9DC34] to-[#F5A623] rounded-full shadow-lg"
+            >
+                Level 22
+            </motion.h1>
+
+            <motion.p
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.6, delay: 0.2 }}
+                className="mt-8 text-xl font-semibold mb-4 text-center text-gray-900 dark:text-[#F9DC34]"
+            >
+                The Light Bulb Challenge
+            </motion.p>
+
             {/* Main Content Area */}
             <div className="w-full max-w-2xl mb-6 flex flex-col gap-6">
                 {/* Visuals Panel */}
