@@ -111,7 +111,7 @@ export default function SignupPage() {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center w-full h-[calc(100vh-4rem)] px-4">
+    <div className="flex flex-col items-center justify-center w-full min-h-[calc(100vh-4rem)] pt-16 md:pt-10 px-4">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
