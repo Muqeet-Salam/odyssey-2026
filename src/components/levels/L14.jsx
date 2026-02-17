@@ -2,7 +2,6 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
-import { useTheme } from "next-themes";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowRight, Gamepad2 } from "lucide-react";
 import { useToast } from "../ui/use-toast";
@@ -30,7 +29,6 @@ const CommandSnake = ({ levelNumber, onComplete, nextLevelNumber }) => {
   const [message, setMessage] = useState("Welcome to Command Snake!");
 
   const gameLoopRef = useRef(null);
-  const { theme, setTheme } = useTheme();
   const { toast } = useToast();
 
   const generateFood = useCallback(() => {
@@ -138,7 +136,6 @@ const CommandSnake = ({ levelNumber, onComplete, nextLevelNumber }) => {
     const pauseCommand = inputValue.match(/^\/pause$/i);
     const resetCommand = inputValue.match(/^\/reset$/i);
     const helpCommand = inputValue.match(/^\/help$/i);
-    const themeCommand = inputValue.match(/^\/theme\s+(dark|light)$/i);
 
     // Prevent 180-degree turns
     const isOppositeDirection = (newDir) => {
@@ -165,9 +162,6 @@ const CommandSnake = ({ levelNumber, onComplete, nextLevelNumber }) => {
       initializeGame();
     } else if (helpCommand) {
       setHelpModalOpen(true);
-    } else if (themeCommand) {
-      const newTheme = themeCommand[1];
-      setTheme(newTheme);
     } else {
       toast({
         title: "Unknown Command",

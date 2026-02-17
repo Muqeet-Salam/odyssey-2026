@@ -5,7 +5,6 @@ import { Input } from "@/components/ui/input";
 import { motion, AnimatePresence } from "framer-motion";
 import { useToast } from "../ui/use-toast";
 import { useCommandHistory } from "@/hooks/useCommandHistory";
-import { useTheme } from "next-themes";
 import { ArrowRight } from "lucide-react";
 
 const CORRECT_NAME = "rick astley";
@@ -21,7 +20,6 @@ const Level20 = ({ onComplete }) => {
     const progressRef = useRef(null);
     const audioRef = useRef(null);
     const { toast } = useToast();
-    const { theme, setTheme } = useTheme();
 
     useEffect(() => {
         audioRef.current = new Audio("/rickroll.webm");
@@ -80,7 +78,6 @@ const Level20 = ({ onComplete }) => {
         pushCommand(inputValue);
         const cmd = inputValue.trim().toLowerCase();
 
-        const themeMatch = cmd.match(/^\/theme\s+(dark|light)$/i);
         const playMatch = cmd.match(/^\/play$/i);
         const stopMatch = cmd.match(/^\/stop$/i);
         const viewMatch = cmd.match(/^\/view\s+details$/i);
@@ -88,15 +85,7 @@ const Level20 = ({ onComplete }) => {
         const resetMatch = cmd.match(/^\/reset$/i);
         const helpMatch = cmd.match(/^\/help$/i);
 
-        if (themeMatch) {
-            setTheme(themeMatch[1].toLowerCase());
-            toast({
-                title: themeMatch[1].toLowerCase() === "dark" ? "🌙 Theme Changed" : "☀️ Theme Changed",
-                description: `Switched to ${themeMatch[1].toLowerCase()} mode`,
-                variant: "default",
-                className: "fixed bottom-12 left-1/2 transform -translate-x-1/2 z-50 bg-white dark:bg-[#1A1A1A] opacity-100 shadow-lg",
-            });
-        } else if (playMatch) {
+        if (playMatch) {
             if (isPlaying) {
                 toast({
                     title: "Already playing 🎶",

@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { Input } from "@/components/ui/input";
-import { useTheme } from "next-themes";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import { useToast } from "../ui/use-toast";
@@ -12,7 +11,6 @@ const CipherPuzzleLevel = ({ levelNumber, onComplete, nextLevelNumber }) => {
   const [message, setMessage] = useState("Transform the numbers to spell 'OpenSys'");
   const [isSuccess, setIsSuccess] = useState(false);
   
-  const { theme, setTheme } = useTheme();
   const { toast } = useToast();
 
   const letterToNumber = (letter) => {
@@ -121,7 +119,6 @@ const CipherPuzzleLevel = ({ levelNumber, onComplete, nextLevelNumber }) => {
     const cipherMatch = inputValue.match(/^\/cipher\s*([%@#$&])\s*(\w*)$/i);
     const resetMatch = inputValue.match(/^\/reset$/i);
     const helpMatch = inputValue.match(/^\/help$/i);
-    const themeMatch = inputValue.match(/^\/theme\s+(dark|light)$/i);
     
     if (cipherMatch) {
       const [, command, param] = cipherMatch;
@@ -155,15 +152,6 @@ const CipherPuzzleLevel = ({ levelNumber, onComplete, nextLevelNumber }) => {
       });
     } else if (helpMatch) {
       setHelpModalOpen(true);
-    } else if (themeMatch) {
-      const newTheme = themeMatch[1];
-      setTheme(newTheme);
-      toast({
-        title: "Theme Changed",
-        description: `Theme set to ${newTheme} mode`,
-        variant: "default",
-        className: "fixed bottom-12 left-1/2 transform -translate-x-1/2 z-50 bg-white dark:bg-[#1A1A1A] opacity-100 shadow-lg",
-      });
     } else {
       toast({
         title: "Unknown Command",

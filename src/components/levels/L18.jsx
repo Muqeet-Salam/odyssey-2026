@@ -5,7 +5,6 @@ import { Input } from "@/components/ui/input";
 import { motion, AnimatePresence } from "framer-motion";
 import { useToast } from "../ui/use-toast";
 import { useCommandHistory } from "@/hooks/useCommandHistory";
-import { useTheme } from "next-themes";
 import { ArrowRight } from "lucide-react";
 
 const CORRECT_PIN = "0720"; // July 20 → 07/20
@@ -18,7 +17,6 @@ const Level18 = ({ onComplete }) => {
     const [attempts, setAttempts] = useState([]);
     const [shake, setShake] = useState(false);
     const { toast } = useToast();
-    const { theme, setTheme } = useTheme();
 
     useEffect(() => {
         if (isSuccess) {
@@ -48,20 +46,11 @@ const Level18 = ({ onComplete }) => {
         pushCommand(inputValue);
         const cmd = inputValue.trim();
 
-        const themeMatch = cmd.match(/^\/theme\s+(dark|light)$/i);
         const enterMatch = cmd.match(/^\/enter\s+(.+)$/i);
         const resetMatch = cmd.match(/^\/reset$/i);
         const helpMatch = cmd.match(/^\/help$/i);
 
-        if (themeMatch) {
-            setTheme(themeMatch[1].toLowerCase());
-            toast({
-                title: themeMatch[1].toLowerCase() === "dark" ? "🌙 Theme Changed" : "☀️ Theme Changed",
-                description: `Switched to ${themeMatch[1].toLowerCase()} mode`,
-                variant: "default",
-                className: "fixed bottom-12 left-1/2 transform -translate-x-1/2 z-50 bg-white dark:bg-[#1A1A1A] opacity-100 shadow-lg",
-            });
-        } else if (enterMatch) {
+        if (enterMatch) {
             const pin = enterMatch[1].trim();
 
             if (!/^\d{4}$/.test(pin)) {
@@ -262,10 +251,6 @@ const Level18 = ({ onComplete }) => {
                                     <div className="bg-gray-50 dark:bg-gray-900/20 p-3 rounded-lg border-l-4 border-[#F5A623]">
                                         <span className="font-bold text-gray-700 dark:text-gray-300">/reset</span>
                                         <p className="mt-1 text-gray-600 dark:text-gray-300">Reset the level.</p>
-                                    </div>
-                                    <div className="bg-gray-50 dark:bg-gray-900/20 p-3 rounded-lg border-l-4 border-[#F5A623]">
-                                        <span className="font-bold text-gray-700 dark:text-gray-300">/theme</span> <span className="text-blue-600 dark:text-blue-300">[dark/light]</span>
-                                        <p className="mt-1 text-gray-600 dark:text-gray-300">Switch themes.</p>
                                     </div>
                                 </div>
                                 <h3 className="text-xl font-bold mb-2 text-gray-800 dark:text-[#F9DC34]">Hint:</h3>

@@ -5,7 +5,6 @@ import { Input } from "@/components/ui/input";
 import { motion, AnimatePresence } from "framer-motion";
 import { useToast } from "../ui/use-toast";
 import { useCommandHistory } from "@/hooks/useCommandHistory";
-import { useTheme } from "next-themes";
 import { ArrowRight } from "lucide-react";
 
 const CORRECT_ANSWERS = ["hollywood sign", "the hollywood sign", "hollywood"];
@@ -18,7 +17,6 @@ const Level21 = ({ onComplete }) => {
     const [located, setLocated] = useState(false);
     const [hintUsed, setHintUsed] = useState(false);
     const { toast } = useToast();
-    const { theme, setTheme } = useTheme();
 
     useEffect(() => {
         if (isSuccess) {
@@ -48,22 +46,13 @@ const Level21 = ({ onComplete }) => {
         pushCommand(inputValue);
         const cmd = inputValue.trim().toLowerCase();
 
-        const themeMatch = cmd.match(/^\/theme\s+(dark|light)$/i);
         const locateMatch = cmd.match(/^\/locate\s+([\d.\-]+)\s+([\d.\-]+)$/i);
         const submitMatch = cmd.match(/^\/submit\s+(.+)$/i);
         const hintMatch = cmd.match(/^\/hint$/i);
         const resetMatch = cmd.match(/^\/reset$/i);
         const helpMatch = cmd.match(/^\/help$/i);
 
-        if (themeMatch) {
-            setTheme(themeMatch[1].toLowerCase());
-            toast({
-                title: themeMatch[1].toLowerCase() === "dark" ? "🌙 Theme Changed" : "☀️ Theme Changed",
-                description: `Switched to ${themeMatch[1].toLowerCase()} mode`,
-                variant: "default",
-                className: "fixed bottom-12 left-1/2 transform -translate-x-1/2 z-50 bg-white dark:bg-[#1A1A1A] opacity-100 shadow-lg",
-            });
-        } else if (locateMatch) {
+        if (locateMatch) {
             const lat = parseFloat(locateMatch[1]);
             const lon = parseFloat(locateMatch[2]);
             // Accept if within ~0.01 degree of the Hollywood Sign coordinates (34.1341, -118.3215)

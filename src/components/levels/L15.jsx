@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Input } from "@/components/ui/input";
-import { useTheme } from "next-themes";
 import { motion, AnimatePresence } from "framer-motion";
 import { HelpCircle, Volume2, Play, Music } from "lucide-react";
 import { useToast } from "../ui/use-toast";
@@ -14,7 +13,6 @@ const Level15 = ({ onComplete }) => {
   const [playbackIndex, setPlaybackIndex] = useState(-1);
   const [isSuccess, setIsSuccess] = useState(false);
   
-  const { theme, setTheme } = useTheme();
   const { toast } = useToast();
 
   const audioContextRef = useRef(null);
@@ -106,7 +104,6 @@ const Level15 = ({ onComplete }) => {
   const handleCommandSubmit = () => {
     const resetMatch = inputValue.match(/^\/reset$/i);
     const helpMatch = inputValue.match(/^\/help$/i);
-    const themeMatch = inputValue.match(/^\/theme\s+(dark|light)$/i);
     const playMatch = inputValue.match(/^\/play\s+([A-G]\s*)+$/);
     const listenMatch = inputValue.match(/^\/listen$/);
 
@@ -120,15 +117,6 @@ const Level15 = ({ onComplete }) => {
       });
     } else if (helpMatch) {
       setHelpModalOpen(true);
-    } else if (themeMatch) {
-      const newTheme = themeMatch[1];
-      setTheme(newTheme);
-      toast({
-        title: "Theme Changed",
-        description: `Theme set to ${newTheme} mode`,
-        variant: "default",
-        className: "fixed bottom-12 left-1/2 transform -translate-x-1/2 z-50 bg-white dark:bg-[#1A1A1A] opacity-100 shadow-lg",
-      });
     } else if (playMatch) {
       const sequence = inputValue.slice(6).split(/\s+/);
       setUserSequence(sequence);
@@ -308,12 +296,6 @@ const Level15 = ({ onComplete }) => {
                     <p className="mt-1 text-gray-600 dark:text-gray-300">Reset the level to its initial state</p>
                   </div>
 
-                  <div className="bg-gray-50 dark:bg-gray-900/20 p-3 rounded-lg border-l-4 border-[#F5A623]">
-                    <span className="font-bold text-gray-700 dark:text-gray-300">/theme</span>{" "}
-                    <span className="text-blue-600 dark:text-blue-300">[dark|light]</span>
-                    <p className="mt-1 text-gray-600 dark:text-gray-300">Change the theme to dark or light.</p>
-                  </div>
-                  
                   <div className="bg-gray-50 dark:bg-gray-900/20 p-3 rounded-lg border-l-4 border-[#F5A623]">
                     <span className="font-bold text-gray-700 dark:text-gray-300">/help</span>
                     <p className="mt-1 text-gray-600 dark:text-gray-300">Show this help menu.</p>

@@ -6,7 +6,6 @@ import { Input } from "@/components/ui/input";
 import { motion, AnimatePresence } from "framer-motion";
 import { useToast } from "../ui/use-toast";
 import { useCommandHistory } from "@/hooks/useCommandHistory";
-import { useTheme } from "next-themes";
 
 // 4x4 board with missing bottom corners
 const BOARD_WIDTH = 4;
@@ -76,7 +75,6 @@ const Level11 = ({ levelNumber, onComplete, nextLevelNumber }) => {
   const [isStuck, setIsStuck] = useState(false);
   const [message, setMessage] = useState("");
   const { toast } = useToast();
-  const { theme, setTheme } = useTheme();
 
   const totalSquares = PLAYABLE_SQUARES.length;
 
@@ -197,21 +195,13 @@ const Level11 = ({ levelNumber, onComplete, nextLevelNumber }) => {
   const handleCommandSubmit = () => {
     pushCommand(inputValue);
     const cmd = inputValue.trim().toLowerCase();
-    const themeMatch = cmd.match(/^\/theme\s+(dark|light)$/i);
     const startMatch = cmd.match(/^\/start\s+([a-d][1-4])$/i);
     const moveMatch = cmd.match(/^\/move\s+([a-d][1-4])$/i);
     const undoMatch = cmd.match(/^\/undo$/i);
     const resetMatch = cmd.match(/^\/reset$/i);
     const helpMatch = cmd.match(/^\/help$/i);
 
-    if (themeMatch) {
-      setTheme(themeMatch[1].toLowerCase());
-      toast({
-        title: themeMatch[1].toLowerCase() === "dark" ? "🌙 Theme Changed" : "☀️ Theme Changed",
-        description: `Switched to ${themeMatch[1].toLowerCase()} mode`,
-        variant: "default"
-      });
-    } else if (startMatch) {
+    if (startMatch) {
       const target = parseNotation(startMatch[1]);
       if (!target) {
         toast({
@@ -625,16 +615,6 @@ const Level11 = ({ levelNumber, onComplete, nextLevelNumber }) => {
                 The Lonely Knight {String.fromCodePoint(0x265e)}
               </h2>
               <div className="space-y-1 mb-6">
-                <div className="bg-gray-50 dark:bg-gray-900/20 p-3 rounded-lg border-l-4 border-[#F5A623]">
-                  <span className="font-bold text-gray-700 dark:text-gray-300">
-                    /theme
-                  </span>{" "}
-                  <span className="text-blue-600 dark:text-blue-300">[dark/light]</span>
-                  <p className="mt-1 text-gray-600 dark:text-gray-300">
-                    Switch between dark and light themes.
-                  </p>
-                </div>
-
                 <div className="bg-gray-50 dark:bg-gray-900/20 p-3 rounded-lg border-l-4 border-[#F5A623]">
                   <span className="font-bold text-gray-700 dark:text-gray-300">
                     /start
