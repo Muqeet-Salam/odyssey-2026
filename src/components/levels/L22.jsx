@@ -20,15 +20,9 @@ const Level22 = ({ onComplete }) => {
     const [bulbTemp, setBulbTemp] = useState(0); // 0 to 100
     const [targetSwitch, setTargetSwitch] = useState(null);
     const [gameLog, setGameLog] = useState([
-        "=== THE LIGHT BULB CHALLENGE ===",
-        "You're standing in a hallway with 3 switches (A, B, C).",
-        "One of them controls a light bulb in a sealed room.",
-        "You can flip switches as many times as you want.",
-        "But once you /enter_room, the door LOCKS and you can't touch the switches.",
-        "Your goal: figure out WHICH switch (A, B, or C) controls the bulb.",
-        "",
-        "Tip: The bulb gives off HEAT when it's been on. Use /wait to let time pass.",
-        "Then /enter_room and check if the bulb is lit, warm, or cold.",
+        "System initialized.",
+        "You are in the hallway. Switches A, B, and C are visible.",
+        "Type /help for commands and hints.",
     ]);
 
     const { toast } = useToast();
@@ -414,12 +408,23 @@ const Level22 = ({ onComplete }) => {
                             </div>
 
                             <h3 className="text-xl font-bold mb-2 text-gray-800 dark:text-[#F9DC34]">
+                                The Story:
+                            </h3>
+                            <p className="text-gray-600 dark:text-gray-300 italic mb-4">
+                                You're standing in a hallway with 3 switches (A, B, C).
+                                One of them controls a light bulb in a sealed room.
+                                You can flip switches as many times as you want,
+                                but once you enter the room, the door locks and you can't touch the switches anymore.
+                                Your goal: figure out WHICH switch controls the bulb.
+                            </p>
+                            <h3 className="text-xl font-bold mb-2 text-gray-800 dark:text-[#F9DC34]">
                                 Hint:
                             </h3>
                             <p className="text-gray-600 dark:text-gray-300 italic">
+                                The bulb gives off HEAT when it's been on. Use /wait to let time pass.
                                 Turn one switch ON and wait. Then turn it OFF, and turn a different switch ON.
-                                Enter the room. If the bulb is lit, it's the switch you left ON.
-                                If it's off but warm, it's the one you turned off. If it's cold, it's the third one.
+                                Enter the room — if the bulb is lit, it's the switch you left ON.
+                                If it's off but warm, it's the one you turned off. If it's cold, it's the third.
                             </p>
                         </div>
 

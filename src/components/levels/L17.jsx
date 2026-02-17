@@ -237,26 +237,32 @@ const Level17 = ({ onComplete }) => {
     const tiltAngle =
         scaleState === "left-lighter" ? 8 : scaleState === "right-lighter" ? -8 : 0;
 
+    const getScaleLayout = (count) => {
+        if (count <= 3) return { perRow: 3, spacing: 18, coinR: 9 };
+        if (count <= 4) return { perRow: 2, spacing: 16, coinR: 8 };
+        return { perRow: 3, spacing: 14, coinR: 7 };
+    };
+
     const getCoinPosition = (coinNum) => {
         const leftIdx = leftPan.indexOf(coinNum);
         const rightIdx = rightPan.indexOf(coinNum);
 
         if (leftIdx !== -1) {
-            const perRow = 3;
+            const { perRow, spacing } = getScaleLayout(leftPan.length);
             const row = Math.floor(leftIdx / perRow);
             const col = leftIdx % perRow;
             const totalInRow = Math.min(perRow, leftPan.length - row * perRow);
-            const startX = 80 - (totalInRow * 18) / 2;
-            return { x: startX + col * 18, y: 115 + row * 18, onScale: true, side: "left" };
+            const startX = 80 - (totalInRow * spacing) / 2;
+            return { x: startX + col * spacing, y: 112 + row * spacing, onScale: true, side: "left" };
         }
 
         if (rightIdx !== -1) {
-            const perRow = 3;
+            const { perRow, spacing } = getScaleLayout(rightPan.length);
             const row = Math.floor(rightIdx / perRow);
             const col = rightIdx % perRow;
             const totalInRow = Math.min(perRow, rightPan.length - row * perRow);
-            const startX = 300 - (totalInRow * 18) / 2;
-            return { x: startX + col * 18, y: 115 + row * 18, onScale: true, side: "right" };
+            const startX = 300 - (totalInRow * spacing) / 2;
+            return { x: startX + col * spacing, y: 112 + row * spacing, onScale: true, side: "right" };
         }
 
         const groundCoins = [];
@@ -330,6 +336,7 @@ const Level17 = ({ onComplete }) => {
 
                         {leftPan.map((coinNum, i) => {
                             const pos = getCoinPosition(coinNum);
+                            const { coinR } = getScaleLayout(leftPan.length);
                             return (
                                 <motion.g
                                     key={`scale-L-${coinNum}`}
@@ -340,7 +347,7 @@ const Level17 = ({ onComplete }) => {
                                     <circle
                                         cx={pos.x}
                                         cy={pos.y}
-                                        r="9"
+                                        r={coinR}
                                         fill={isSuccess && coinNum === fakeCoin ? "#ef4444" : isFailed && coinNum === fakeCoin ? "#ef4444" : "#F9DC34"}
                                         stroke={isSuccess && coinNum === fakeCoin ? "#dc2626" : isFailed && coinNum === fakeCoin ? "#dc2626" : "#F5A623"}
                                         strokeWidth="1.5"
@@ -354,6 +361,7 @@ const Level17 = ({ onComplete }) => {
 
                         {rightPan.map((coinNum, i) => {
                             const pos = getCoinPosition(coinNum);
+                            const { coinR } = getScaleLayout(rightPan.length);
                             return (
                                 <motion.g
                                     key={`scale-R-${coinNum}`}
@@ -364,7 +372,7 @@ const Level17 = ({ onComplete }) => {
                                     <circle
                                         cx={pos.x}
                                         cy={pos.y}
-                                        r="9"
+                                        r={coinR}
                                         fill={isSuccess && coinNum === fakeCoin ? "#ef4444" : isFailed && coinNum === fakeCoin ? "#ef4444" : "#F9DC34"}
                                         stroke={isSuccess && coinNum === fakeCoin ? "#dc2626" : isFailed && coinNum === fakeCoin ? "#dc2626" : "#F5A623"}
                                         strokeWidth="1.5"
