@@ -13,8 +13,13 @@ const generateRandomBits = () => {
 };
 
 const Level6 = ({ onComplete }) => {
-  const [bits, setBits] = useState(() => generateRandomBits());
+  const [bits, setBits] = useState([0, 0, 0, 0, 0, 0, 0]);
   const [inputValue, setInputValue] = useState("");
+
+  // Initialize random bits on client only (avoid hydration mismatch)
+  useEffect(() => {
+    setBits(generateRandomBits());
+  }, []);
   const { pushCommand, handleKeyDown: handleHistoryKeys } = useCommandHistory(setInputValue);
   const [isHelpModalOpen, setHelpModalOpen] = useState(false);
   const [attempts, setAttempts] = useState([]);

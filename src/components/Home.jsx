@@ -11,31 +11,37 @@ import { convertDotsToUnderscores } from "@/lib/utils";
 import { staticData } from "@/lib/staticdata";
 import { motion } from "framer-motion";
 
-// Floating particle component
-const Particle = ({ delay, duration, x, size }) => (
-  <motion.div
-    className="absolute rounded-full"
-    style={{
-      width: size,
-      height: size,
-      left: `${x}%`,
-      bottom: -20,
-      background: `radial-gradient(circle, rgba(249,220,52,${0.15 + Math.random() * 0.2}) 0%, transparent 70%)`,
-    }}
-    animate={{
-      y: [0, -window?.innerHeight || -800],
-      x: [0, (Math.random() - 0.5) * 120],
-      opacity: [0, 0.8, 0.6, 0],
-      scale: [0.5, 1.2, 0.8, 0.3],
-    }}
-    transition={{
-      duration,
-      delay,
-      repeat: Infinity,
-      ease: "easeOut",
-    }}
-  />
-);
+// Floating particle component (only rendered after mount to avoid hydration mismatch)
+const Particle = ({ delay, duration, x, size }) => {
+  const glow = React.useRef(0.15 + Math.random() * 0.2).current;
+  const drift = React.useRef((Math.random() - 0.5) * 120).current;
+  const h = typeof window !== "undefined" ? window.innerHeight : 800;
+
+  return (
+    <motion.div
+      className="absolute rounded-full"
+      style={{
+        width: size,
+        height: size,
+        left: `${x}%`,
+        bottom: -20,
+        background: `radial-gradient(circle, rgba(249,220,52,${glow}) 0%, transparent 70%)`,
+      }}
+      animate={{
+        y: [0, -h],
+        x: [0, drift],
+        opacity: [0, 0.8, 0.6, 0],
+        scale: [0.5, 1.2, 0.8, 0.3],
+      }}
+      transition={{
+        duration,
+        delay,
+        repeat: Infinity,
+        ease: "easeOut",
+      }}
+    />
+  );
+};
 
 // Grid node that pulses
 const GridNode = ({ x, y, delay }) => (
@@ -54,6 +60,11 @@ const Home = () => {
   const { data: session } = useSession();
   const [userDet, setUserDet] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
   
   const getUserId = () => {
     if (!session || !session.user) return null;
@@ -138,18 +149,20 @@ const Home = () => {
         }}
       />
 
-      {/* Floating particles */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {Array.from({ length: 225 }).map((_, i) => (
-          <Particle
-            key={i}
-            delay={i * 0.1}
-            duration={5 + Math.random() * 7}
-            x={2 + (i / 45) * 96}
-            size={2 + Math.random() * 5}
-          />
-        ))}
-      </div>
+      {/* Floating particles - only render on client to avoid hydration mismatch */}
+      {mounted && (
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          {Array.from({ length: 225 }).map((_, i) => (
+            <Particle
+              key={i}
+              delay={i * 0.1}
+              duration={5 + Math.random() * 7}
+              x={2 + (i / 45) * 96}
+              size={2 + Math.random() * 5}
+            />
+          ))}
+        </div>
+      )}
       
       <div className="z-10 w-full max-w-md px-6 py-12 flex flex-col items-center">
         <motion.div 

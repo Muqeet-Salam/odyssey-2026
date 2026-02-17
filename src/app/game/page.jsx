@@ -68,15 +68,24 @@ const Game = () => {
     );
   };
 
-  const handleLevelComplete = async () => {
+  const handleLevelComplete = async (nextLevelNumber) => {
     setTransitioning(true);
     const userId = getUserId();
-    if (userId) {
-      await setScore(userId);
-      setTimeout(() => {
-        setTransitioning(false);
-      }, 2000); // Simulate loading time
-    }
+    if (userId) await setScore(userId);
+
+    const resolvedNextLevel =
+      typeof nextLevelNumber === "number"
+        ? nextLevelNumber
+        : (selectedLevel || 0) + 1;
+
+    setTimeout(() => {
+      setTransitioning(false);
+      if (resolvedNextLevel > staticData.maxLevel) {
+        setSelectedLevel(null);
+        return;
+      }
+      setSelectedLevel(resolvedNextLevel);
+    }, 2000); // Simulate loading time
   };
 
   const setScore = async (userId) => {
@@ -161,7 +170,7 @@ const Game = () => {
           >
             ← Back to Levels
           </button>
-          <CurrentLevel onComplete={handleLevelComplete} />
+          <CurrentLevel onComplete={() => handleLevelComplete(selectedLevel + 1)} />
         </>
       )}
     </div>

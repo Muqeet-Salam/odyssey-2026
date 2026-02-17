@@ -364,6 +364,15 @@ const Level11 = ({ levelNumber, onComplete, nextLevelNumber }) => {
 
   return (
     <div className="flex flex-col items-center mt-8 max-w-4xl mx-auto px-4">
+      <motion.h1
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+        className="px-6 py-3 text-2xl font-bold text-[#1A1A1A] dark:text-[#111111] bg-gradient-to-r from-[#F9DC34] to-[#F5A623] rounded-full shadow-lg"
+      >
+        Level 11
+      </motion.h1>
+
       {/* Question */}
       <motion.p
         initial={{ opacity: 0 }}

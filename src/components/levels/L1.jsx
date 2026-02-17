@@ -38,13 +38,20 @@ const Level1 = ({ onComplete }) => {
   const { pushCommand, handleKeyDown: handleHistoryKeys } = useCommandHistory(setInputValue);
   const [isHelpModalOpen, setHelpModalOpen] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
-  const [grid, setGrid] = useState(() => createInitialGrid());
+  const [grid, setGrid] = useState(SOLVED);
+  const [gridReady, setGridReady] = useState(false);
   const [moveCount, setMoveCount] = useState(0);
   const { toast } = useToast();
 
-  // Check win
+  // Initialize grid with random shuffle on client only (avoid hydration mismatch)
   useEffect(() => {
-    if (grid.every((id, i) => id === SOLVED[i]) && !isSuccess) {
+    setGrid(createInitialGrid());
+    setGridReady(true);
+  }, []);
+
+  // Check win (only after grid is shuffled)
+  useEffect(() => {
+    if (gridReady && grid.every((id, i) => id === SOLVED[i]) && !isSuccess) {
       setIsSuccess(true);
     }
   }, [grid, isSuccess]);
