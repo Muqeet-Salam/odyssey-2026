@@ -1,11 +1,11 @@
 "use client";
 
 import React, { useState, useEffect, useCallback, useRef } from "react";
+import Image from "next/image";
 import { Input } from "@/components/ui/input";
 import { motion, AnimatePresence } from "framer-motion";
 import { useToast } from "../ui/use-toast";
 import { useCommandHistory } from "@/hooks/useCommandHistory";
-import { ArrowRight } from "lucide-react";
 import { useTheme } from "next-themes";
 
 // 4x4 board with missing bottom corners
@@ -123,8 +123,7 @@ const Level11 = ({ levelNumber, onComplete, nextLevelNumber }) => {
       toast({
         title: "Knight's Tour Complete! " + String.fromCodePoint(0x265e),
         description: `Closed tour finished in ${moveCount} moves!`,
-        variant: "success",
-      });
+        variant: "success",        className: "fixed bottom-12 left-1/2 transform -translate-x-1/2 z-50 bg-green-500 text-white opacity-100 border-0 shadow-lg",      });
       setTimeout(() => onComplete(nextLevelNumber), 2000);
     }
   }, [isSuccess, onComplete, toast, moveCount]);
@@ -374,23 +373,6 @@ const Level11 = ({ levelNumber, onComplete, nextLevelNumber }) => {
 
   return (
     <div className="flex flex-col items-center mt-8 max-w-4xl mx-auto px-4">
-      <motion.h1 
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
-        className="px-6 py-3 text-2xl font-bold text-[#1A1A1A] dark:text-[#111111] bg-gradient-to-r from-[#F9DC34] to-[#F5A623] rounded-full shadow-lg"
-      >
-        Level {levelNumber || 11}
-      </motion.h1>
-      
-      <motion.p 
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.6, delay: 0.2 }}
-        className="mt-8 text-xl font-semibold mb-4 text-center text-gray-900 dark:text-[#F9DC34]"
-      >
-        {message}
-      </motion.p>
 
       {/* Board */}
       <motion.div
@@ -597,14 +579,21 @@ const Level11 = ({ levelNumber, onComplete, nextLevelNumber }) => {
 
       </motion.div>
 
+      {/* Sticky Command Panel */}
+      <div className="sticky bottom-0 left-0 right-0 z-40 bg-gradient-to-t from-purple-50/95 via-purple-50/90 to-transparent dark:from-[#1A0F2E] dark:via-[#1A0F2E]/95 dark:to-transparent backdrop-blur-sm border-t border-purple-300/30 dark:border-purple-500/20 py-4 mt-8">
+        <div className="flex flex-col items-center gap-3 max-w-4xl mx-auto px-4">
       <motion.span
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.6, delay: 0.5 }}
-        className="mx-10 my-6 text-center cursor-pointer text-gray-700 dark:text-gray-300 hover:text-[#F5A623] dark:hover:text-[#F9DC34] transition-colors"
+        className="text-sm text-center cursor-pointer text-purple-700 dark:text-purple-300 hover:text-[#F5A623] dark:hover:text-[#F9DC34] transition-colors"
         onClick={() => setHelpModalOpen(true)}
       >
-        Type <span className="font-mono bg-gray-100 dark:bg-gray-900/30 px-2 py-1 rounded">/help</span> to get commands and hints
+        Type{" "}
+        <span className="font-mono bg-purple-100 dark:bg-purple-900/30 px-2 py-1 rounded">
+          /help
+        </span>{" "}
+        to get commands and hints
       </motion.span>
 
       <motion.div 
@@ -619,17 +608,23 @@ const Level11 = ({ levelNumber, onComplete, nextLevelNumber }) => {
               onChange={(e) => setInputValue(e.target.value)}
               onKeyDown={(e) => { handleEnter(e); handleHistoryKeys(e); }}
               placeholder="Enter command..."
-              className="border-gray-300 dark:border-gray-600/50 bg-white dark:bg-[#111111]/70 shadow-inner focus:ring-[#F5A623] focus:border-[#F9DC34]"
+              className="border-purple-300 dark:border-purple-600/50 bg-white dark:bg-[#1A0F2E]/70 shadow-inner focus:ring-[#F5A623] focus:border-[#F9DC34]"
             />
-            <button 
+            <button
               onClick={handleCommandSubmit}
               className="bg-gradient-to-r from-[#F9DC34] to-[#F5A623] hover:from-[#FFE55C] hover:to-[#FFBD4A] p-2 rounded-lg shadow-md transition-transform hover:scale-105"
             >
-              <div className="w-6 h-6 flex items-center justify-center">
-                <ArrowRight className="w-5 h-5 text-gray-900" />
-              </div>
+              <Image
+                src="/runcode.png"
+                alt="Run"
+                height={20}
+                width={20}
+                className="rounded-sm"
+              />
             </button>
           </motion.div>
+        </div>
+      </div>
 
       {/* Help Modal */}
       {isHelpModalOpen && (
@@ -681,24 +676,24 @@ const Level11 = ({ levelNumber, onComplete, nextLevelNumber }) => {
                     Columns: A-D, Rows: 1-4 (A1 and D1 are missing)
                   </p>
                 </div>
-                <div className="bg-gray-50 dark:bg-gray-900/20 p-3 rounded-lg border-l-4 border-[#F5A623]">
-                  <span className="font-bold text-gray-700 dark:text-gray-300">
+                <div className="bg-purple-50 dark:bg-purple-900/20 p-3 rounded-lg border-l-4 border-[#F5A623]">
+                  <span className="font-bold text-purple-700 dark:text-purple-300">
                     /undo
                   </span>
                   <p className="mt-1 text-gray-600 dark:text-gray-300">
                     Take back your last move.
                   </p>
                 </div>
-                <div className="bg-gray-50 dark:bg-gray-900/20 p-3 rounded-lg border-l-4 border-[#F5A623]">
-                  <span className="font-bold text-gray-700 dark:text-gray-300">
+                <div className="bg-purple-50 dark:bg-purple-900/20 p-3 rounded-lg border-l-4 border-[#F5A623]">
+                  <span className="font-bold text-purple-700 dark:text-purple-300">
                     /reset
                   </span>
                   <p className="mt-1 text-gray-600 dark:text-gray-300">
                     Start over with the current starting position.
                   </p>
                 </div>
-                <div className="bg-gray-50 dark:bg-gray-900/20 p-3 rounded-lg border-l-4 border-[#F5A623]">
-                  <span className="font-bold text-gray-700 dark:text-gray-300">
+                <div className="bg-purple-50 dark:bg-purple-900/20 p-3 rounded-lg border-l-4 border-[#F5A623]">
+                  <span className="font-bold text-purple-700 dark:text-purple-300">
                     /help
                   </span>
                   <p className="mt-1 text-gray-600 dark:text-gray-300">
@@ -707,19 +702,19 @@ const Level11 = ({ levelNumber, onComplete, nextLevelNumber }) => {
                 </div>
               </div>
 
-              <h3 className="text-xl font-bold mb-2 text-gray-800 dark:text-[#F9DC34]">
+              <h3 className="text-xl font-bold mb-2 text-purple-800 dark:text-[#F9DC34]">
                 Hint:
               </h3>
               <p className="text-gray-600 dark:text-gray-300 italic">
                 Lore: The bridge only holds if every stone is touched once. Choose a start, cross every stone, and return to where you began.
-                Hint: Start at A4. A good opening is A4 → C3 → A2 → C1. If you later reach B1, you're close to closing the loop.
+                Hint: Start at A4. A good opening is A4 {" -> "} C3 {" -> "} A2 {" -> "} C1. If you later reach B1, you're close to closing the loop.
               </p>
             </div>
 
-            <div className="bg-gray-50 dark:bg-gray-900/30 px-6 py-4 text-center flex-shrink-0">
+            <div className="bg-purple-50 dark:bg-purple-900/30 px-6 py-4 text-center flex-shrink-0">
               <button
                 onClick={() => setHelpModalOpen(false)}
-                className="bg-gradient-to-r from-[#F9DC34] to-[#F5A623] hover:from-[#FFE55C] hover:to-[#FFBD4A] px-6 py-2 rounded-lg text-gray-900 font-medium shadow-md transition-transform hover:scale-105"
+                className="bg-gradient-to-r from-[#F9DC34] to-[#F5A623] hover:from-[#FFE55C] hover:to-[#FFBD4A] px-6 py-2 rounded-lg text-purple-900 font-medium shadow-md transition-transform hover:scale-105"
               >
                 Close
               </button>
