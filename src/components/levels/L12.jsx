@@ -1,262 +1,522 @@
-import React, { useState, useEffect } from 'react';
+"use client";
+
+import React, { useState, useEffect } from "react";
+import Image from "next/image";
 import { Input } from "@/components/ui/input";
-import { useTheme } from "next-themes";
-import { motion, AnimatePresence } from "framer-motion";
-import { HelpCircle, ArrowRight, Clock } from "lucide-react";
+import { motion } from "framer-motion";
 import { useToast } from "../ui/use-toast";
+import { useCommandHistory } from "@/hooks/useCommandHistory";
+import { MoonIcon, SunIcon } from "@radix-ui/react-icons";
+import { useTheme } from "next-themes";
 
-const TimekeepersLevel = ({ levelNumber, onComplete, nextLevelNumber }) => {
+const PASSWORD = "unlock";
+const CIPHER_TEXT = "XQORFN"; // Caesar shift +3 of "UNLOCK"
+const CIPHER_SHIFT = 3;
+const MAX_BRIGHTNESS = 5;
+
+const Level12 = ({ onComplete }) => {
   const [inputValue, setInputValue] = useState("");
+  const { pushCommand, handleKeyDown: handleHistoryKeys } = useCommandHistory(setInputValue);
   const [isHelpModalOpen, setHelpModalOpen] = useState(false);
-  const [currentTime, setCurrentTime] = useState("8:46");
   const [isSuccess, setIsSuccess] = useState(false);
-
-  const { theme, setTheme } = useTheme();
+  const [brightness, setBrightness] = useState(0); // 0 = black, 5 = full
+  const [hasLooked, setHasLooked] = useState(false);
+  const [decoded, setDecoded] = useState(false); // track if player has decoded
   const { toast } = useToast();
+  const { theme, setTheme } = useTheme();
 
-  const timeToMinutes = (timeStr) => {
-    const [hours, minutes] = timeStr.split(':').map(Number);
-    return hours * 60 + minutes;
-  };
-
-  const minutesToTime = (totalMinutes) => {
-    const hours = Math.floor(totalMinutes / 60);
-    const minutes = totalMinutes % 60;
-    return `${hours}:${minutes.toString().padStart(2, '0')}`;
+  // Caesar decode helper
+  const caesarDecode = (text, shift) => {
+    return text.split("").map(ch => {
+      if (ch >= "A" && ch <= "Z") {
+        return String.fromCharCode(((ch.charCodeAt(0) - 65 - shift + 26) % 26) + 65);
+      }
+      if (ch >= "a" && ch <= "z") {
+        return String.fromCharCode(((ch.charCodeAt(0) - 97 - shift + 26) % 26) + 97);
+      }
+      return ch;
+    }).join("");
   };
 
   useEffect(() => {
-    if (currentTime === "10:58") {
-      setIsSuccess(true);
+    if (isSuccess) {
       toast({
-        title: "Level Completed!",
-        description: "You've reset the ancient clock to 10:58!",
-        variant: "success",
-        className: "fixed bottom-12 left-1/2 transform -translate-x-1/2 z-50 bg-green-500 text-white opacity-100 border-0 shadow-lg",
+        title: "Access Granted!",
+        description: "Cipher cracked — system unlocked!",
+        variant: "success"
       });
-      
       setTimeout(() => {
-        onComplete(nextLevelNumber);
+        onComplete(4);
       }, 2000);
     }
-  }, [currentTime, nextLevelNumber, onComplete, toast]);
-
-  const resetGame = () => {
-    setCurrentTime("8:46");
-    setIsSuccess(false);
-    toast({
-      title: "Level Reset",
-      description: "The clock has been reset to 8:46",
-      variant: "default",
-      className: "fixed bottom-12 left-1/2 transform -translate-x-1/2 z-50 bg-white dark:bg-[#1A1A1A] opacity-100 shadow-lg",
-    });
-  };
-
-  const allowedMoves = [
-    "+3m", "+9m", "+15m", "+27m", "+1h3m", "+1h30m", 
-    "-6m", "-12m"
-  ];
+  }, [isSuccess, onComplete, toast]);
 
   const handleInputChange = (e) => {
     setInputValue(e.target.value);
   };
 
-  const handleKeyPress = (e) => {
+  const handleEnter = (e) => {
     if (e.key === "Enter") {
       handleCommandSubmit();
     }
   };
 
   const handleCommandSubmit = () => {
-    const resetMatch = inputValue.match(/^\/reset$/i);
-    const helpMatch = inputValue.match(/^\/help$/i);
-    const themeMatch = inputValue.match(/^\/theme\s+(dark|light)$/i);
-    const moveMatch = inputValue.match(/^\/move\s+([+-]\d+h?\d*m?)$/i);
-    
-    if (resetMatch) {
-      resetGame();
+    pushCommand(inputValue);
+    const cmd = inputValue.trim().toLowerCase();
+
+    const increaseBright = cmd.match(/^\/increase\s+brightness$/i);
+    const decreaseBright = cmd.match(/^\/decrease\s+brightness$/i);
+    const lookMatch = cmd.match(/^\/look$/i);
+    const decodeMatch = cmd.match(/^\/decode\s+(\d+)\s+(.+)$/i);
+    const enterMatch = cmd.match(/^\/enter\s+(.+)$/i);
+    const resetMatch = cmd.match(/^\/reset$/i);
+    const helpMatch = cmd.match(/^\/help$/i);
+
+    if (increaseBright) {
+      if (brightness >= MAX_BRIGHTNESS) {
+        toast({
+          title: "Max brightness!",
+          description: "The screen is already at full brightness.",
+          variant: "default"
+        });
+      } else {
+        setBrightness((b) => b + 1);
+        setHasLooked(false);
+        toast({
+          title: `Brightness: ${brightness + 1}/${MAX_BRIGHTNESS} ☀️`,
+          description: brightness + 1 >= 3 ? "The screen is getting readable..." : "Still quite dim...",
+          variant: "default"
+        });
+      }
+    } else if (decreaseBright) {
+      if (brightness <= 0) {
+        toast({
+          title: "Already off!",
+          description: "The screen can't get any darker.",
+          variant: "default"
+        });
+      } else {
+        setBrightness((b) => b - 1);
+        setHasLooked(false);
+        toast({
+          title: `Brightness: ${brightness - 1}/${MAX_BRIGHTNESS}`,
+          description: "The screen dims...",
+          variant: "default"
+        });
+      }
+    } else if (lookMatch) {
+      setHasLooked(true);
+      if (brightness === 0) {
+        toast({
+          title: "Too dark!",
+          description: "You can't see anything. The screen is completely black.",
+          variant: "destructive"
+        });
+      } else if (brightness <= 2) {
+        toast({
+          title: "Barely visible... ",
+          description: "You can make out some text but it's garbled. Increase brightness.",
+          variant: "default"
+        });
+      } else if (brightness <= 4) {
+        toast({
+          title: "Encrypted text visible",
+          description: `The screen reads: \"${CIPHER_TEXT}\" — this looks encoded...`,
+          variant: "default"
+        });
+      } else {
+        toast({
+          title: "Full view",
+          description: `Cipher: \"${CIPHER_TEXT}\" | Method: CAESAR | Shift: ${CIPHER_SHIFT}`,
+          variant: "default"
+        });
+      }
+    } else if (decodeMatch) {
+      const shift = parseInt(decodeMatch[1]);
+      const text = decodeMatch[2].trim();
+      const result = caesarDecode(text, shift);
+      if (result.toLowerCase() === PASSWORD) {
+        setDecoded(true);
+        toast({
+          title: "Decrypted!",
+          description: `"${text}" → "${result}" — That looks like the password!`,
+          variant: "default"
+        });
+      } else {
+        toast({
+          title: `Decoded: "${result}"`,
+          description: "Doesn't seem right... Try a different shift value.",
+          variant: "default"
+        });
+      }
+    } else if (enterMatch) {
+      const guess = enterMatch[1].trim().toLowerCase();
+      if (guess === PASSWORD) {
+        setIsSuccess(true);
+      } else {
+        toast({
+          title: "Wrong password ❌",
+          description: brightness < 3
+            ? "Can you read what's on screen?"
+            : `"${guess}" is incorrect. Look at the screen carefully.`,
+          variant: "destructive"
+        });
+      }
+    } else if (resetMatch) {
+      setBrightness(0);
+      setHasLooked(false);
+      setDecoded(false);
+      setIsSuccess(false);
+      toast({
+        title: "Level Reset",
+        description: "Screen returned to black.",
+        variant: "default"
+      });
     } else if (helpMatch) {
       setHelpModalOpen(true);
-    } else if (themeMatch) {
-      const newTheme = themeMatch[1];
-      setTheme(newTheme);
-      toast({
-        title: "Theme Changed",
-        description: `Theme set to ${newTheme} mode`,
-        variant: "default",
-        className: "fixed bottom-12 left-1/2 transform -translate-x-1/2 z-50 bg-white dark:bg-[#1A1A1A] opacity-100 shadow-lg",
-      });
-    } else if (moveMatch) {
-      const move = moveMatch[1];
-      
-      if (!allowedMoves.includes(move)) {
-        toast({
-          title: "Invalid Move",
-          description: "This move is not allowed. Check /help for valid moves.",
-          variant: "destructive",
-          className: "fixed bottom-12 left-1/2 transform -translate-x-1/2 z-50 bg-red-500 text-white opacity-100 shadow-lg",
-        });
-        setInputValue("");
-        return;
-      }
-
-      const minutes = parseMoveToMinutes(move);
-      
-      const currentMinutes = timeToMinutes(currentTime);
-      const newMinutes = currentMinutes + minutes;
-      
-      const finalMinutes = Math.max(0, newMinutes);
-      
-      setCurrentTime(minutesToTime(finalMinutes));
-      
-      toast({
-        title: "Time Moved",
-        description: `Moved by ${move}. Current time: ${minutesToTime(finalMinutes)}`,
-        variant: "default",
-        className: "fixed bottom-12 left-1/2 transform -translate-x-1/2 z-50 bg-white dark:bg-[#1A1A1A] opacity-100 shadow-lg",
-      });
     } else {
       toast({
         title: "Unknown Command",
         description: "Type /help to see available commands",
-        variant: "destructive",
-        className: "fixed bottom-12 left-1/2 transform -translate-x-1/2 z-50 bg-red-500 text-white opacity-100 shadow-lg",
+        variant: "destructive"
       });
     }
-    
+
     setInputValue("");
   };
 
-  const parseMoveToMinutes = (move) => {
-    const hourMatch = move.match(/(\d+)h/);
-    const minuteMatch = move.match(/(\d+)m/);
-    const hours = hourMatch ? parseInt(hourMatch[1]) : 0;
-    const minutes = minuteMatch ? parseInt(minuteMatch[1]) : 0;
-    const sign = move.startsWith('-') ? -1 : 1;
-    
-    return sign * (hours * 60 + minutes);
+  const closeHelpModal = () => {
+    setHelpModalOpen(false);
   };
+
+  // Visual brightness: 0 = fully black, 5 = fully visible
+  const screenOpacity = brightness / MAX_BRIGHTNESS;
+  const bgBrightness = Math.round(10 + (brightness / MAX_BRIGHTNESS) * 30); // 10 to 40
 
   return (
     <div className="flex flex-col items-center mt-8 max-w-4xl mx-auto px-4">
-      <motion.h1 
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
-        className="px-6 py-3 text-2xl font-bold text-[#1A1A1A] dark:text-[#111111] bg-gradient-to-r from-[#F9DC34] to-[#F5A623] rounded-full shadow-lg"
-      >
-        Level 12
-      </motion.h1>
-      
-      <motion.p 
+      {/* Level title badge - now in sticky header */}
+
+      {/* Question */}
+      <motion.p
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.6, delay: 0.2 }}
         className="mt-8 text-xl font-semibold mb-4 text-center text-gray-900 dark:text-[#F9DC34]"
       >
-        The ancient clock is stuck at 8:46. Reset it to 10:58!
+        The Cipher Lock — Decrypt the password.
       </motion.p>
 
+      {/* Monitor */}
       <motion.div
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.6, delay: 0.3 }}
-        className="bg-white dark:bg-[#1A1A1A]/40 rounded-2xl p-6 shadow-lg backdrop-blur-sm border border-gray-200 dark:border-gray-700/30 w-full max-w-md"
+        className="w-full max-w-md relative"
       >
-        <div className="min-h-48 flex flex-col items-center justify-center">
-          <Clock className="w-24 h-24 text-gray-700 dark:text-gray-300 mb-4" />
-          <div className="text-4xl font-bold text-gray-800 dark:text-[#F9DC34]">
-            {currentTime}
-          </div>
+        {/* Monitor bezel */}
+        <div className="bg-[#1a1a2e] rounded-2xl p-3 border border-[#333] shadow-lg">
+          {/* Screen */}
+          <motion.div
+            animate={{
+              backgroundColor: `rgb(${bgBrightness}, ${bgBrightness}, ${bgBrightness + 10})`,
+            }}
+            transition={{ duration: 0.6 }}
+            className="rounded-lg relative overflow-hidden"
+            style={{ minHeight: 220 }}
+          >
+            {/* Scanlines effect */}
+            <div
+              className="absolute inset-0 pointer-events-none z-10"
+              style={{
+                backgroundImage: "repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.08) 2px, rgba(0,0,0,0.08) 4px)",
+              }}
+            />
+
+            {/* Screen content */}
+            <div className="relative z-0 flex flex-col items-center justify-center h-full p-6 font-mono" style={{ minHeight: 260 }}>
+
+              {/* System log header */}
+              <motion.p
+                animate={{ opacity: Math.min(screenOpacity * 1.5, 1) }}
+                className="text-[10px] self-start mb-3"
+                style={{ color: `rgba(100, 100, 140, ${screenOpacity * 0.7})` }}
+              >
+                {brightness >= 1 ? "> SYSTEM AUTH v2.8.47" : ""}
+              </motion.p>
+
+              {/* Cipher display area */}
+              <div className="relative mb-3 w-full">
+                <motion.div
+                  animate={{ opacity: screenOpacity }}
+                  transition={{ duration: 0.5 }}
+                  className="text-center space-y-2"
+                >
+                  {/* Encoded password - main cipher text */}
+                  <p
+                    className="text-3xl font-bold tracking-[0.3em]"
+                    style={{
+                      color: `rgba(239, 68, 68, ${screenOpacity})`,
+                      textShadow: brightness >= 3
+                        ? "0 0 12px rgba(239, 68, 68, 0.4)"
+                        : "none",
+                    }}
+                  >
+                    {brightness >= 3 ? CIPHER_TEXT : brightness >= 1 ? "██████" : ""}
+                  </p>
+
+                  {/* Method label */}
+                  <p
+                    className="text-xs tracking-wider"
+                    style={{ color: `rgba(74, 222, 128, ${brightness >= 3 ? screenOpacity * 0.6 : 0})` }}
+                  >
+                    {brightness >= 3 ? "METHOD: CAESAR" : ""}
+                  </p>
+
+                  {/* Shift key - only visible at high brightness */}
+                  <p
+                    className="text-xs tracking-wider"
+                    style={{ color: `rgba(249, 220, 52, ${brightness >= 5 ? 0.8 : brightness >= 4 ? 0.15 : 0})` }}
+                  >
+                    {brightness >= 4 ? `SHIFT: ${CIPHER_SHIFT}` : ""}
+                  </p>
+                </motion.div>
+              </div>
+
+              {/* Password input field visual on screen */}
+              <motion.div
+                animate={{ opacity: 0.05 + screenOpacity * 0.8 }}
+                transition={{ duration: 0.5 }}
+                className="w-48 border rounded px-3 py-1.5 text-center text-sm"
+                style={{
+                  borderColor: `rgba(120, 120, 180, ${0.1 + screenOpacity * 0.5})`,
+                  color: `rgba(200, 200, 220, ${screenOpacity * 0.8})`,
+                  backgroundColor: "rgba(0, 0, 0, 0.3)",
+                }}
+              >
+                {decoded ? "✓ decrypted" : "Enter password..."}
+              </motion.div>
+
+              {/* Look result overlay */}
+              {hasLooked && brightness >= 5 && (
+                <motion.p
+                  initial={{ opacity: 0, y: 5 }}
+                  animate={{ opacity: 0.7 }}
+                  className="mt-3 text-[10px]"
+                  style={{ color: "rgba(249, 220, 52, 0.8)" }}
+                >
+                  ⚠ ENCRYPTED — use /decode to crack
+                </motion.p>
+              )}
+              {hasLooked && brightness >= 3 && brightness < 5 && (
+                <motion.p
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 0.5 }}
+                  className="mt-3 text-[10px] text-gray-400"
+                >
+                  ... something below the cipher is too faint ...
+                </motion.p>
+              )}
+              {hasLooked && brightness > 0 && brightness < 3 && (
+                <motion.p
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 0.4 }}
+                  className="mt-3 text-[10px] text-gray-500"
+                >
+                  ... too dim to read clearly ...
+                </motion.p>
+              )}
+            </div>
+
+            {/* Brightness indicator on screen */}
+            <div className="absolute bottom-2 right-3 flex gap-0.5 z-20">
+              {Array.from({ length: MAX_BRIGHTNESS }, (_, i) => (
+                <div
+                  key={i}
+                  className="w-2 h-3 rounded-sm"
+                  style={{
+                    backgroundColor: i < brightness
+                      ? `rgba(249, 220, 52, ${0.3 + (brightness / MAX_BRIGHTNESS) * 0.7})`
+                      : `rgba(60, 60, 80, ${0.1 + screenOpacity * 0.3})`,
+                  }}
+                />
+              ))}
+            </div>
+
+            {/* Power LED */}
+            <div className="absolute bottom-2 left-3 z-20">
+              <div
+                className="w-2 h-2 rounded-full"
+                style={{
+                  backgroundColor: brightness > 0 ? "#22c55e" : "#333",
+                  boxShadow: brightness > 0 ? "0 0 4px #22c55e" : "none",
+                }}
+              />
+            </div>
+          </motion.div>
+        </div>
+
+        {/* Monitor stand */}
+        <div className="flex justify-center mt-1">
+          <div className="w-16 h-3 bg-[#333] rounded-t-sm" />
+        </div>
+        <div className="flex justify-center">
+          <div className="w-28 h-2 bg-[#2a2a3a] rounded-b-lg" />
         </div>
       </motion.div>
-      
-      <motion.span
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.6, delay: 0.5 }}
-        className="mx-10 my-6 text-center cursor-pointer text-gray-700 dark:text-gray-300 hover:text-[#F5A623] dark:hover:text-[#F9DC34] transition-colors"
-        onClick={() => setHelpModalOpen(true)}
-      >
-        Type <span className="font-mono bg-gray-100 dark:bg-gray-900/30 px-2 py-1 rounded">/help</span> to get commands and hints
-      </motion.span>
 
-      <motion.div 
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, delay: 0.6 }}
-        className="flex gap-2 w-full max-w-md"
-      >
-        <Input
-          type="text"
-          value={inputValue}
-          onChange={handleInputChange}
-          onKeyPress={handleKeyPress}
-          placeholder="Enter command (e.g., /move +1h3m)"
-          className="border-gray-300 dark:border-gray-600/50 bg-white dark:bg-[#111111]/70 shadow-inner focus:ring-[#F5A623] focus:border-[#F9DC34]"
-        />
-        <button 
-          onClick={handleCommandSubmit}
-          className="bg-gradient-to-r from-[#F9DC34] to-[#F5A623] hover:from-[#FFE55C] hover:to-[#FFBD4A] p-2 rounded-lg shadow-md transition-transform hover:scale-105"
-        >
-          <div className="w-6 h-6 flex items-center justify-center">
-            <ArrowRight className="w-5 h-5 text-gray-900" />
-          </div>
-        </button>
-      </motion.div>
+      {/* Brightness bar */}
 
-      <AnimatePresence>
-        {isHelpModalOpen && (
-          <motion.div 
+
+      {/* Sticky Command Panel */}
+      <div className="sticky bottom-0 left-0 right-0 z-40 border-t border-gray-500/20 py-4 mt-8">
+        <div className="flex flex-col items-center gap-3 max-w-4xl mx-auto px-4">
+          <motion.span
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60 backdrop-blur-sm"
+            transition={{ duration: 0.6, delay: 0.5 }}
+            className="text-sm text-center cursor-pointer text-gray-700 dark:text-gray-300 hover:text-[#F5A623] dark:hover:text-[#F9DC34] transition-colors"
+            onClick={() => setHelpModalOpen(true)}
           >
-            <motion.div 
-              initial={{ scale: 0.9 }}
-              animate={{ scale: 1 }}
-              exit={{ scale: 0.9 }}
-              className="bg-white dark:bg-[#1A1A1A] rounded-xl overflow-hidden shadow-2xl max-w-md w-full mx-4 max-h-[80vh] flex flex-col"
+            Type{" "}
+            <span className="font-mono bg-gray-100 dark:bg-gray-900/30 px-2 py-1 rounded">
+              /help
+            </span>{" "}
+            to get commands and hints
+          </motion.span>
+
+          {/* Command input */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.6 }}
+            className="flex gap-2 w-full max-w-md"
+          >
+            <Input
+              type="text"
+              value={inputValue}
+              onChange={handleInputChange}
+              onKeyDown={(e) => { handleEnter(e); handleHistoryKeys(e); }}
+              placeholder="Enter command..."
+              className="border-gray-300 dark:border-gray-600/50 bg-white dark:bg-[#111111]/70 shadow-inner focus:ring-[#F5A623] focus:border-[#F9DC34]"
+            />
+            <button
+              onClick={handleCommandSubmit}
+              className="bg-gradient-to-r from-[#F9DC34] to-[#F5A623] hover:from-[#FFE55C] hover:to-[#FFBD4A] p-2 rounded-lg shadow-md transition-transform hover:scale-105"
             >
-              <div className="p-6 overflow-y-auto flex-grow">
-                <h2 className="text-2xl font-bold mb-4 text-gray-800 dark:text-[#F9DC34]">Allowed Moves:</h2>
-                <div className="space-y-1 mb-6">
-                  {allowedMoves.map((move) => (
-                    <div key={move} className="bg-gray-50 dark:bg-gray-900/20 p-3 rounded-lg border-l-4 border-[#F5A623]">
-                      <span className="font-bold text-gray-700 dark:text-gray-300">/move {move}</span>
-                    </div>
-                  ))}
-                  
-                  <div className="bg-gray-50 dark:bg-gray-900/20 p-3 rounded-lg border-l-4 border-[#F5A623]">
-                    <span className="font-bold text-gray-700 dark:text-gray-300">/reset</span>
-                    <p className="mt-1 text-gray-600 dark:text-gray-300">Reset the clock to 8:46.</p>
-                  </div>
-                </div>
-                
-                <h3 className="text-xl font-bold mb-2 text-gray-800 dark:text-[#F9DC34]">How to Play:</h3>
-                <ul className="list-disc pl-5 space-y-1 text-gray-600 dark:text-gray-300">
-                  <li>You must reset the clock from 8:46 to 10:58</li>
-                  <li>Use only the allowed time moves</li>
-                </ul>
-                
-               
-              </div>
-              
-              <div className="bg-gray-50 dark:bg-gray-900/30 px-6 py-4 text-center">
-                <button
-                  onClick={() => setHelpModalOpen(false)}
-                  className="bg-gradient-to-r from-[#F9DC34] to-[#F5A623] hover:from-[#FFE55C] hover:to-[#FFBD4A] px-6 py-2 rounded-lg text-gray-900 font-medium shadow-md transition-transform hover:scale-105"
-                >
-                  Close
-                </button>
-              </div>
-            </motion.div>
+              <Image
+                src="/runcode.png"
+                alt="Run"
+                height={20}
+                width={20}
+                className="rounded-sm"
+              />
+            </button>
           </motion.div>
-        )}
-      </AnimatePresence>
+        </div>
+      </div>
+
+      {/* Help Modal */}
+      {isHelpModalOpen && (
+        <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black bg-opacity-60 backdrop-blur-sm transition-opacity duration-300">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-white dark:bg-[#1A1A1A] rounded-xl overflow-hidden shadow-2xl max-w-md w-full mx-4 max-h-[80vh] flex flex-col"
+          >
+            <div className="p-6 overflow-y-auto flex-grow">
+              <h2 className="text-2xl font-bold mb-4 text-gray-800 dark:text-[#F9DC34]">
+                Available Commands:
+              </h2>
+              <div className="space-y-1 mb-6">
+                <div className="bg-gray-50 dark:bg-gray-900/20 p-3 rounded-lg border-l-4 border-[#F5A623]">
+                  <span className="font-bold text-gray-700 dark:text-gray-300">
+                    /increase brightness
+                  </span>
+                  <p className="mt-1 text-gray-600 dark:text-gray-300">
+                    Turn up the screen brightness by one level.
+                  </p>
+                </div>
+
+                <div className="bg-gray-50 dark:bg-gray-900/20 p-3 rounded-lg border-l-4 border-[#F5A623]">
+                  <span className="font-bold text-gray-700 dark:text-gray-300">
+                    /decrease brightness
+                  </span>
+                  <p className="mt-1 text-gray-600 dark:text-gray-300">
+                    Turn down the screen brightness by one level.
+                  </p>
+                </div>
+
+                <div className="bg-gray-50 dark:bg-gray-900/20 p-3 rounded-lg border-l-4 border-[#F5A623]">
+                  <span className="font-bold text-gray-700 dark:text-gray-300">
+                    /look
+                  </span>
+                  <p className="mt-1 text-gray-600 dark:text-gray-300">
+                    Look carefully at the screen to read what's displayed.
+                  </p>
+                </div>
+
+                <div className="bg-gray-50 dark:bg-gray-900/20 p-3 rounded-lg border-l-4 border-[#F5A623]">
+                  <span className="font-bold text-gray-700 dark:text-gray-300">
+                    /decode
+                  </span>{" "}
+                  <span className="text-blue-600 dark:text-blue-300">[shift] [text]</span>
+                  <p className="mt-1 text-gray-600 dark:text-gray-300">
+                    Decrypt text using a Caesar cipher with the given shift.
+                  </p>
+                </div>
+
+                <div className="bg-gray-50 dark:bg-gray-900/20 p-3 rounded-lg border-l-4 border-[#F5A623]">
+                  <span className="font-bold text-gray-700 dark:text-gray-300">
+                    /enter
+                  </span>{" "}
+                  <span className="text-blue-600 dark:text-blue-300">[password]</span>
+                  <p className="mt-1 text-gray-600 dark:text-gray-300">
+                    Enter the decrypted password.
+                  </p>
+                </div>
+
+                <div className="bg-gray-50 dark:bg-gray-900/20 p-3 rounded-lg border-l-4 border-[#F5A623]">
+                  <span className="font-bold text-gray-700 dark:text-gray-300">
+                    /reset
+                  </span>
+                  <p className="mt-1 text-gray-600 dark:text-gray-300">
+                    Reset the level.
+                  </p>
+                </div>
+
+                <div className="bg-gray-50 dark:bg-gray-900/20 p-3 rounded-lg border-l-4 border-[#F5A623]">
+                  <span className="font-bold text-gray-700 dark:text-gray-300">
+                    /help
+                  </span>
+                  <p className="mt-1 text-gray-600 dark:text-gray-300">
+                    Show commands and hints.
+                  </p>
+                </div>
+              </div>
+
+              <h3 className="text-xl font-bold mb-2 text-gray-800 dark:text-[#F9DC34]">
+                Hint:
+              </h3>
+              <p className="text-gray-600 dark:text-gray-300 italic">
+                Summon the sun to reveal the truth. But even in light, the letters wear a mask.
+              </p>
+            </div>
+
+            <div className="bg-gray-50 dark:bg-gray-900/30 px-6 py-4 text-center flex-shrink-0">
+              <button
+                onClick={closeHelpModal}
+                className="bg-gradient-to-r from-[#F9DC34] to-[#F5A623] hover:from-[#FFE55C] hover:to-[#FFBD4A] px-6 py-2 rounded-lg text-gray-900 font-medium shadow-md transition-transform hover:scale-105"
+              >
+                Close
+              </button>
+            </div>
+          </motion.div>
+        </div>
+      )}
     </div>
   );
 };
 
-export default TimekeepersLevel;
+export default Level12;
