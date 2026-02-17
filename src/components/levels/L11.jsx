@@ -521,22 +521,6 @@ const Level11 = ({ levelNumber, onComplete, nextLevelNumber }) => {
                     </g>
                   )}
 
-                  {/* Valid move indicator (pulsing yellow dot) */}
-                  {isValid && !isKnight && (
-                    <motion.circle
-                      cx={cx}
-                      cy={cy}
-                      r="8"
-                      fill="#F9DC34"
-                      initial={{ opacity: 0, scale: 0 }}
-                      animate={{
-                        opacity: [0.3, 0.7, 0.3],
-                        scale: 1,
-                      }}
-                      transition={{ duration: 1.5, repeat: Infinity }}
-                    />
-                  )}
-
                   {/* Vanished square mark */}
                   {isVisited && (
                     <motion.text

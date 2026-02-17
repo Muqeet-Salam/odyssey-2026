@@ -1,11 +1,12 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
+import Image from "next/image";
 import { Input } from "@/components/ui/input";
 import { motion, AnimatePresence } from "framer-motion";
 import { useToast } from "../ui/use-toast";
 import { useCommandHistory } from "@/hooks/useCommandHistory";
-import { ArrowRight, Thermometer, Lightbulb } from "lucide-react";
+import { Thermometer, Lightbulb } from "lucide-react";
 
 const Level22 = ({ onComplete }) => {
     const [inputValue, setInputValue] = useState("");
@@ -42,7 +43,6 @@ const Level22 = ({ onComplete }) => {
                 title: "Correct Switch Identified! 💡",
                 description: "Logic prevails. Access granted.",
                 variant: "success",
-                className: "fixed bottom-12 left-1/2 transform -translate-x-1/2 z-50 bg-green-500 text-white opacity-100 border-0 shadow-lg",
             });
             setTimeout(() => {
                 onComplete();
@@ -89,7 +89,6 @@ const Level22 = ({ onComplete }) => {
                 title: "Unknown Command",
                 description: "Type /help for valid commands.",
                 variant: "destructive",
-                className: "fixed bottom-12 left-1/2 transform -translate-x-1/2 z-50 bg-red-500 text-white opacity-100 shadow-lg",
             });
         }
 
@@ -202,23 +201,14 @@ const Level22 = ({ onComplete }) => {
                 title: "Wrong Answer ❌",
                 description: "Logic flaw detected. Sequence failed.",
                 variant: "destructive",
-                className: "fixed bottom-12 left-1/2 transform -translate-x-1/2 z-50 bg-red-500 text-white opacity-100 shadow-lg",
             });
         }
     };
 
     return (
         <div className="flex flex-col items-center mt-8 max-w-4xl mx-auto px-4 w-full">
-            <motion.h1
-                initial={{ opacity: 0, y: -20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="px-6 py-3 text-2xl font-bold text-[#1A1A1A] dark:text-[#111111] bg-gradient-to-r from-[#F9DC34] to-[#F5A623] rounded-full shadow-lg mb-8"
-            >
-                Level 22
-            </motion.h1>
-
             {/* Main Content Area */}
-            <div className="w-full max-w-2xl mb-24 flex flex-col gap-6">
+            <div className="w-full max-w-2xl mb-6 flex flex-col gap-6">
                 {/* Visuals Panel */}
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
@@ -306,79 +296,132 @@ const Level22 = ({ onComplete }) => {
                 </motion.div>
             </div>
 
-            {/* Sticky Command Input */}
-            <div className="fixed bottom-0 left-0 right-0 z-40 border-t border-gray-700/50 bg-[#111111]/90 backdrop-blur-md py-4">
-                <div className="max-w-4xl mx-auto px-4 w-full flex flex-col items-center gap-2">
-                    <p
-                        className="text-gray-500 hover:text-[#F9DC34] cursor-pointer transition-colors text-xs mb-1"
+            {/* Sticky Command Panel */}
+            <div className="sticky bottom-0 left-0 right-0 z-40 border-t border-gray-500/20 py-4 mt-8">
+                <div className="flex flex-col items-center gap-3 max-w-4xl mx-auto px-4">
+                    <motion.span
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ duration: 0.6, delay: 0.5 }}
+                        className="text-sm text-center cursor-pointer text-gray-700 dark:text-gray-300 hover:text-[#F5A623] dark:hover:text-[#F9DC34] transition-colors"
                         onClick={() => setHelpModalOpen(true)}
                     >
-                        Type <span className="font-mono bg-gray-800 px-1 rounded">/help</span> for commands
-                    </p>
-                    <div className="flex gap-2 w-full max-w-xl">
+                        Type{" "}
+                        <span className="font-mono bg-gray-100 dark:bg-gray-900/30 px-2 py-1 rounded">
+                            /help
+                        </span>{" "}
+                        to get commands and hints
+                    </motion.span>
+
+                    {/* Command input */}
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.6, delay: 0.6 }}
+                        className="flex gap-2 w-full max-w-md"
+                    >
                         <Input
                             type="text"
                             value={inputValue}
                             onChange={handleInputChange}
                             onKeyDown={(e) => { handleEnter(e); handleHistoryKeys(e); }}
-                            placeholder="Enter command (e.g., /flip A)..."
-                            autoFocus
-                            className="bg-black/50 border-gray-700 focus:border-[#F9DC34] text-gray-200 font-mono shadow-inner h-12 text-lg"
+                            placeholder="Enter command..."
+                            className="border-gray-300 dark:border-gray-600/50 bg-white dark:bg-[#111111]/70 shadow-inner focus:ring-[#F5A623] focus:border-[#F9DC34]"
                         />
                         <button
                             onClick={handleCommandSubmit}
-                            className="bg-[#F9DC34] hover:bg-[#FFE55C] text-black px-4 rounded-lg transition-colors shadow-lg font-bold"
+                            className="bg-gradient-to-r from-[#F9DC34] to-[#F5A623] hover:from-[#FFE55C] hover:to-[#FFBD4A] p-2 rounded-lg shadow-md transition-transform hover:scale-105"
                         >
-                            <ArrowRight size={24} />
+                            <Image
+                                src="/runcode.png"
+                                alt="Run"
+                                height={20}
+                                width={20}
+                                className="rounded-sm"
+                            />
                         </button>
-                    </div>
+                    </motion.div>
                 </div>
             </div>
 
 
             {/* Help Modal */}
-            <AnimatePresence>
-                {isHelpModalOpen && (
-                    <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black bg-opacity-70 backdrop-blur-sm p-4">
-                        <motion.div
-                            initial={{ scale: 0.9, opacity: 0 }}
-                            animate={{ scale: 1, opacity: 1 }}
-                            exit={{ scale: 0.9, opacity: 0 }}
-                            className="bg-[#1A1A1A] border border-gray-700 rounded-xl max-w-md w-full overflow-hidden shadow-2xl"
-                        >
-                            <div className="p-6">
-                                <h2 className="text-xl font-bold text-[#F9DC34] mb-4">Command Reference</h2>
-                                <div className="space-y-3 font-mono text-sm text-gray-300">
-                                    <div className="bg-black/30 p-2 rounded">
-                                        <span className="text-[#F9DC34]">/flip [A/B/C]</span>
-                                        <p className="text-gray-500 text-xs mt-1">Toggle a switch. (Hallway only)</p>
-                                    </div>
-                                    <div className="bg-black/30 p-2 rounded">
-                                        <span className="text-[#F9DC34]">/wait [minutes]</span>
-                                        <p className="text-gray-500 text-xs mt-1">Wait for time to pass. Affects bulb temperature.</p>
-                                    </div>
-                                    <div className="bg-black/30 p-2 rounded">
-                                        <span className="text-[#F9DC34]">/enter_room</span>
-                                        <p className="text-gray-500 text-xs mt-1">Lock switches and inspect the bulb.</p>
-                                    </div>
-                                    <div className="bg-black/30 p-2 rounded">
-                                        <span className="text-[#F9DC34]">/submit [A/B/C]</span>
-                                        <p className="text-gray-500 text-xs mt-1">Identify the controlling switch.</p>
-                                    </div>
+            {isHelpModalOpen && (
+                <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black bg-opacity-60 backdrop-blur-sm transition-opacity duration-300">
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="bg-white dark:bg-[#1A1A1A] rounded-xl overflow-hidden shadow-2xl max-w-md w-full mx-4 max-h-[80vh] flex flex-col"
+                    >
+                        <div className="p-6 overflow-y-auto flex-grow">
+                            <h2 className="text-2xl font-bold mb-4 text-gray-800 dark:text-[#F9DC34]">
+                                Available Commands:
+                            </h2>
+                            <div className="space-y-1 mb-6">
+                                <div className="bg-gray-50 dark:bg-gray-900/20 p-3 rounded-lg border-l-4 border-[#F5A623]">
+                                    <span className="font-bold text-gray-700 dark:text-gray-300">
+                                        /flip
+                                    </span>{" "}
+                                    <span className="text-blue-600 dark:text-blue-300">[A|B|C]</span>
+                                    <p className="mt-1 text-gray-600 dark:text-gray-300">
+                                        Toggle a switch ON or OFF. (Hallway only)
+                                    </p>
+                                </div>
+                                <div className="bg-gray-50 dark:bg-gray-900/20 p-3 rounded-lg border-l-4 border-[#F5A623]">
+                                    <span className="font-bold text-gray-700 dark:text-gray-300">
+                                        /wait
+                                    </span>{" "}
+                                    <span className="text-blue-600 dark:text-blue-300">[minutes]</span>
+                                    <p className="mt-1 text-gray-600 dark:text-gray-300">
+                                        Wait for time to pass. Affects bulb temperature.
+                                    </p>
+                                </div>
+                                <div className="bg-gray-50 dark:bg-gray-900/20 p-3 rounded-lg border-l-4 border-[#F5A623]">
+                                    <span className="font-bold text-gray-700 dark:text-gray-300">
+                                        /enter_room
+                                    </span>
+                                    <p className="mt-1 text-gray-600 dark:text-gray-300">
+                                        Lock switches and step inside to inspect the bulb.
+                                    </p>
+                                </div>
+                                <div className="bg-gray-50 dark:bg-gray-900/20 p-3 rounded-lg border-l-4 border-[#F5A623]">
+                                    <span className="font-bold text-gray-700 dark:text-gray-300">
+                                        /submit
+                                    </span>{" "}
+                                    <span className="text-blue-600 dark:text-blue-300">[A|B|C]</span>
+                                    <p className="mt-1 text-gray-600 dark:text-gray-300">
+                                        Identify which switch controls the bulb. (Room only)
+                                    </p>
+                                </div>
+                                <div className="bg-gray-50 dark:bg-gray-900/20 p-3 rounded-lg border-l-4 border-[#F5A623]">
+                                    <span className="font-bold text-gray-700 dark:text-gray-300">
+                                        /help
+                                    </span>
+                                    <p className="mt-1 text-gray-600 dark:text-gray-300">
+                                        Show available commands and hints.
+                                    </p>
                                 </div>
                             </div>
-                            <div className="bg-black/50 p-4 flex justify-center border-t border-gray-800">
-                                <button
-                                    onClick={() => setHelpModalOpen(false)}
-                                    className="px-6 py-2 bg-gray-800 hover:bg-gray-700 text-white rounded transition-colors"
-                                >
-                                    Close
-                                </button>
-                            </div>
-                        </motion.div>
-                    </div>
-                )}
-            </AnimatePresence>
+
+                            <h3 className="text-xl font-bold mb-2 text-gray-800 dark:text-[#F9DC34]">
+                                Hint:
+                            </h3>
+                            <p className="text-gray-600 dark:text-gray-300 italic">
+                                Light reveals what is on, but heat reveals what was on. Use time wisely before entering.
+                            </p>
+                        </div>
+
+                        <div className="bg-gray-50 dark:bg-gray-900/30 px-6 py-4 text-center flex-shrink-0">
+                            <button
+                                onClick={() => setHelpModalOpen(false)}
+                                className="bg-gradient-to-r from-[#F9DC34] to-[#F5A623] hover:from-[#FFE55C] hover:to-[#FFBD4A] px-6 py-2 rounded-lg text-gray-900 font-medium shadow-md transition-transform hover:scale-105"
+                            >
+                                Close
+                            </button>
+                        </div>
+                    </motion.div>
+                </div>
+            )}
         </div>
     );
 };
