@@ -32,6 +32,7 @@ import Level18 from "@/components/levels/L18";
 import Level19 from "@/components/levels/L19";
 import Level20 from "@/components/levels/L20";
 import Level21 from "@/components/levels/L21";
+import Level22 from "@/components/levels/L22";
 
 
 const levels = [
@@ -56,6 +57,7 @@ const levels = [
   Level19,
   Level20,
   Level21,
+  Level22,
 ];
 
 const Game = () => {
