@@ -123,7 +123,8 @@ const Level11 = ({ levelNumber, onComplete, nextLevelNumber }) => {
       toast({
         title: "Knight's Tour Complete! " + String.fromCodePoint(0x265e),
         description: `Closed tour finished in ${moveCount} moves!`,
-        variant: "success",        className: "fixed bottom-12 left-1/2 transform -translate-x-1/2 z-50 bg-green-500 text-white opacity-100 border-0 shadow-lg",      });
+        variant: "success",
+      });
       setTimeout(() => onComplete(nextLevelNumber), 2000);
     }
   }, [isSuccess, onComplete, toast, moveCount]);
@@ -379,7 +380,7 @@ const Level11 = ({ levelNumber, onComplete, nextLevelNumber }) => {
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.6, delay: 0.3 }}
-        className="bg-[#1a1a2e] rounded-2xl p-3 shadow-lg border border-gray-700/30 w-full max-w-[380px] relative"
+        className="bg-[#1A1A1A] rounded-2xl p-3 shadow-lg border border-gray-700/30 w-full max-w-[380px] relative"
       >
         <svg viewBox={`0 0 ${SVG_W} ${SVG_H}`} className="w-full">
           {/* Column labels */}
@@ -390,7 +391,7 @@ const Level11 = ({ levelNumber, onComplete, nextLevelNumber }) => {
               y={SVG_H - 4}
               textAnchor="middle"
               fontSize="12"
-              fill="#8888BB"
+              fill="#888899"
               fontWeight="bold"
             >
               {letter}
@@ -405,7 +406,7 @@ const Level11 = ({ levelNumber, onComplete, nextLevelNumber }) => {
               y={i * CELL + CELL / 2 + 5}
               textAnchor="middle"
               fontSize="12"
-              fill="#8888BB"
+              fill="#888899"
               fontWeight="bold"
             >
               {BOARD_HEIGHT - i}
@@ -435,15 +436,15 @@ const Level11 = ({ levelNumber, onComplete, nextLevelNumber }) => {
               // Determine fill
               let fillColor;
               if (isKnight) {
-                fillColor = "#7C3AED";
+                fillColor = "#F5A623";
               } else if (isStart && !isKnight) {
                 fillColor = "#2E7D32";
               } else if (isVisited) {
-                fillColor = "#0a0a15";
+                fillColor = "#0a0a0a";
               } else if (isValid) {
-                fillColor = isDark ? "#3a2060" : "#4a2878";
+                fillColor = isDark ? "#2a2a2a" : "#333333";
               } else {
-                fillColor = isDark ? "#2D1B4B" : "#3D2060";
+                fillColor = isDark ? "#1f1f1f" : "#2a2a2a";
               }
 
               return (
@@ -454,7 +455,7 @@ const Level11 = ({ levelNumber, onComplete, nextLevelNumber }) => {
                     width={CELL}
                     height={CELL}
                     fill={fillColor}
-                    stroke={isVisited ? "#0a0a15" : "#6B21A8"}
+                    stroke={isVisited ? "#0a0a0a" : "#444444"}
                     strokeWidth={isVisited ? "0.5" : "0.8"}
                     rx="2"
                     animate={{
@@ -580,35 +581,36 @@ const Level11 = ({ levelNumber, onComplete, nextLevelNumber }) => {
       </motion.div>
 
       {/* Sticky Command Panel */}
-      <div className="sticky bottom-0 left-0 right-0 z-40 bg-gradient-to-t from-purple-50/95 via-purple-50/90 to-transparent dark:from-[#1A0F2E] dark:via-[#1A0F2E]/95 dark:to-transparent backdrop-blur-sm border-t border-purple-300/30 dark:border-purple-500/20 py-4 mt-8">
+      <div className="sticky bottom-0 left-0 right-0 z-40 border-t border-gray-500/20 py-4 mt-8">
         <div className="flex flex-col items-center gap-3 max-w-4xl mx-auto px-4">
-      <motion.span
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.6, delay: 0.5 }}
-        className="text-sm text-center cursor-pointer text-purple-700 dark:text-purple-300 hover:text-[#F5A623] dark:hover:text-[#F9DC34] transition-colors"
-        onClick={() => setHelpModalOpen(true)}
-      >
-        Type{" "}
-        <span className="font-mono bg-purple-100 dark:bg-purple-900/30 px-2 py-1 rounded">
-          /help
-        </span>{" "}
-        to get commands and hints
-      </motion.span>
+          <motion.span
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.6, delay: 0.5 }}
+            className="text-sm text-center cursor-pointer text-gray-700 dark:text-gray-300 hover:text-[#F5A623] dark:hover:text-[#F9DC34] transition-colors"
+            onClick={() => setHelpModalOpen(true)}
+          >
+            Type{" "}
+            <span className="font-mono bg-gray-100 dark:bg-gray-900/30 px-2 py-1 rounded">
+              /help
+            </span>{" "}
+            to get commands and hints
+          </motion.span>
 
-      <motion.div 
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, delay: 0.6 }}
-        className="flex gap-2 w-full max-w-md"
-      >
+          {/* Command input */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.6 }}
+            className="flex gap-2 w-full max-w-md"
+          >
             <Input
               type="text"
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
               onKeyDown={(e) => { handleEnter(e); handleHistoryKeys(e); }}
               placeholder="Enter command..."
-              className="border-purple-300 dark:border-purple-600/50 bg-white dark:bg-[#1A0F2E]/70 shadow-inner focus:ring-[#F5A623] focus:border-[#F9DC34]"
+              className="border-gray-300 dark:border-gray-600/50 bg-white dark:bg-[#111111]/70 shadow-inner focus:ring-[#F5A623] focus:border-[#F9DC34]"
             />
             <button
               onClick={handleCommandSubmit}
@@ -676,24 +678,24 @@ const Level11 = ({ levelNumber, onComplete, nextLevelNumber }) => {
                     Columns: A-D, Rows: 1-4 (A1 and D1 are missing)
                   </p>
                 </div>
-                <div className="bg-purple-50 dark:bg-purple-900/20 p-3 rounded-lg border-l-4 border-[#F5A623]">
-                  <span className="font-bold text-purple-700 dark:text-purple-300">
+                <div className="bg-gray-50 dark:bg-gray-900/20 p-3 rounded-lg border-l-4 border-[#F5A623]">
+                  <span className="font-bold text-gray-700 dark:text-gray-300">
                     /undo
                   </span>
                   <p className="mt-1 text-gray-600 dark:text-gray-300">
                     Take back your last move.
                   </p>
                 </div>
-                <div className="bg-purple-50 dark:bg-purple-900/20 p-3 rounded-lg border-l-4 border-[#F5A623]">
-                  <span className="font-bold text-purple-700 dark:text-purple-300">
+                <div className="bg-gray-50 dark:bg-gray-900/20 p-3 rounded-lg border-l-4 border-[#F5A623]">
+                  <span className="font-bold text-gray-700 dark:text-gray-300">
                     /reset
                   </span>
                   <p className="mt-1 text-gray-600 dark:text-gray-300">
                     Start over with the current starting position.
                   </p>
                 </div>
-                <div className="bg-purple-50 dark:bg-purple-900/20 p-3 rounded-lg border-l-4 border-[#F5A623]">
-                  <span className="font-bold text-purple-700 dark:text-purple-300">
+                <div className="bg-gray-50 dark:bg-gray-900/20 p-3 rounded-lg border-l-4 border-[#F5A623]">
+                  <span className="font-bold text-gray-700 dark:text-gray-300">
                     /help
                   </span>
                   <p className="mt-1 text-gray-600 dark:text-gray-300">
@@ -702,7 +704,7 @@ const Level11 = ({ levelNumber, onComplete, nextLevelNumber }) => {
                 </div>
               </div>
 
-              <h3 className="text-xl font-bold mb-2 text-purple-800 dark:text-[#F9DC34]">
+              <h3 className="text-xl font-bold mb-2 text-gray-800 dark:text-[#F9DC34]">
                 Hint:
               </h3>
               <p className="text-gray-600 dark:text-gray-300 italic">
@@ -711,10 +713,10 @@ const Level11 = ({ levelNumber, onComplete, nextLevelNumber }) => {
               </p>
             </div>
 
-            <div className="bg-purple-50 dark:bg-purple-900/30 px-6 py-4 text-center flex-shrink-0">
+            <div className="bg-gray-50 dark:bg-gray-900/30 px-6 py-4 text-center flex-shrink-0">
               <button
                 onClick={() => setHelpModalOpen(false)}
-                className="bg-gradient-to-r from-[#F9DC34] to-[#F5A623] hover:from-[#FFE55C] hover:to-[#FFBD4A] px-6 py-2 rounded-lg text-purple-900 font-medium shadow-md transition-transform hover:scale-105"
+                className="bg-gradient-to-r from-[#F9DC34] to-[#F5A623] hover:from-[#FFE55C] hover:to-[#FFBD4A] px-6 py-2 rounded-lg text-gray-900 font-medium shadow-md transition-transform hover:scale-105"
               >
                 Close
               </button>
