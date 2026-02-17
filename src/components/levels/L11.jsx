@@ -374,6 +374,15 @@ const Level11 = ({ levelNumber, onComplete, nextLevelNumber }) => {
 
   return (
     <div className="flex flex-col items-center mt-8 max-w-4xl mx-auto px-4">
+      {/* Question */}
+      <motion.p
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.6, delay: 0.2 }}
+        className="mt-8 text-lg font-semibold mb-4 text-center text-gray-900 dark:text-[#F9DC34]"
+      >
+        Complete a closed knight&apos;s tour on the bridge.
+      </motion.p>
 
       {/* Board */}
       <motion.div
@@ -536,6 +545,26 @@ const Level11 = ({ levelNumber, onComplete, nextLevelNumber }) => {
                       {String.fromCodePoint(0x2716)}
                     </motion.text>
                   )}
+
+                  {/* Possible move indicator dot */}
+                  {isValid && !isVisited && (
+                    <motion.circle
+                      cx={cx}
+                      cy={cy}
+                      r="6"
+                      fill="#F9DC34"
+                      initial={{ scale: 0, opacity: 0 }}
+                      animate={{ 
+                        scale: [1, 1.2, 1],
+                        opacity: [0.6, 0.9, 0.6]
+                      }}
+                      transition={{ 
+                        duration: 1.5,
+                        repeat: Infinity,
+                        ease: "easeInOut"
+                      }}
+                    />
+                  )}
                 </g>
               );
             })
@@ -551,8 +580,9 @@ const Level11 = ({ levelNumber, onComplete, nextLevelNumber }) => {
                 textAnchor="middle"
                 fontSize="36"
                 className="select-none"
-                initial={{ scale: 0.3, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
+                initial={{ scale: 0.5, opacity: 0, rotate: -180 }}
+                animate={{ scale: 1, opacity: 1, rotate: 0 }}
+                exit={{ scale: 0.5, opacity: 0 }}
                 transition={{ type: "spring", stiffness: 300, damping: 20 }}
               >
                 {String.fromCodePoint(0x265e)}
@@ -688,13 +718,17 @@ const Level11 = ({ levelNumber, onComplete, nextLevelNumber }) => {
                 </div>
               </div>
 
-              <h3 className="text-xl font-bold mb-2 text-gray-800 dark:text-[#F9DC34]">
-                Hint:
+              <h3 className="text-lg font-bold mb-2 text-gray-800 dark:text-[#F9DC34]">
+                How to Solve:
               </h3>
-              <p className="text-gray-600 dark:text-gray-300 italic">
-                Lore: The bridge only holds if every stone is touched once. Choose a start, cross every stone, and return to where you began.
-                Hint: Start at A4. A good opening is A4 {" -> "} C3 {" -> "} A2 {" -> "} C1. If you later reach B1, you're close to closing the loop.
-              </p>
+              <ul className="text-sm text-gray-600 dark:text-gray-300 space-y-1.5 list-disc pl-5">
+                <li>Complete a <strong>closed knight&apos;s tour</strong></li>
+                <li>Visit all 14 squares exactly once</li>
+                <li>Use knight moves (L-shaped: 2 squares + 1 perpendicular)</li>
+                <li>Return to your starting square to finish</li>
+                <li><strong>Tip:</strong> Try starting at A4, opening with A4 → C3 → A2 → C1</li>
+                <li>Use <code className="bg-gray-200 dark:bg-gray-800 px-1 rounded">/undo</code> when stuck</li>
+              </ul>
             </div>
 
             <div className="bg-gray-50 dark:bg-gray-900/30 px-6 py-4 text-center flex-shrink-0">
