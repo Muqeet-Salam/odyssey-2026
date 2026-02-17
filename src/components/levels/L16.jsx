@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import Image from "next/image";
 import { Input } from "@/components/ui/input";
 import { motion, AnimatePresence } from "framer-motion";
 import { useToast } from "../ui/use-toast";
@@ -55,8 +56,8 @@ const Level16 = ({ onComplete }) => {
         if (locateMatch) {
             const lat = parseFloat(locateMatch[1]);
             const lon = parseFloat(locateMatch[2]);
-            // Accept if within ~0.01 degree of the Hollywood Sign coordinates (34.1341, -118.3215)
-            if (Math.abs(lat - 34.13) < 0.1 && Math.abs(lon + 118.32) < 0.1) {
+            // Accept if within ~0.01 degree of the Hollywood Sign coordinates (34.0907, -118.3266)
+            if (Math.abs(lat - 34.0907) < 0.1 && Math.abs(lon + 118.3266) < 0.1) {
                 setLocated(true);
                 toast({
                     title: "📍 Location traced!",
@@ -169,13 +170,13 @@ const Level16 = ({ onComplete }) => {
                                     <div className="flex items-center gap-3">
                                         <span className="text-gray-600 text-[10px] w-12 uppercase">Latitude</span>
                                         <motion.span animate={{ opacity: [1, 0.4, 1] }} transition={{ repeat: Infinity, duration: 1.5 }} className="text-[#F9DC34] text-lg font-bold tracking-widest font-mono">
-                                            34.????
+                                            34.0907
                                         </motion.span>
                                     </div>
                                     <div className="flex items-center gap-3">
                                         <span className="text-gray-600 text-[10px] w-12 uppercase">Longitude</span>
                                         <motion.span animate={{ opacity: [1, 0.4, 1] }} transition={{ repeat: Infinity, duration: 1.5, delay: 0.5 }} className="text-[#F9DC34] text-lg font-bold tracking-widest font-mono">
-                                            -118.????
+                                            -118.3266
                                         </motion.span>
                                     </div>
                                 </div>
@@ -185,28 +186,15 @@ const Level16 = ({ onComplete }) => {
                                 {located ? (
                                     <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }}>
                                         <p className="text-[#4ADE80] text-[10px] mb-3 uppercase tracking-tighter">▸ Visual data stream established</p>
-                                        <div className="border border-gray-800 rounded-lg overflow-hidden bg-[#0d0d1a] relative">
-                                            <svg viewBox="0 0 380 180" className="w-full">
-                                                <defs>
-                                                    <linearGradient id="sky21" x1="0" y1="0" x2="0" y2="1">
-                                                        <stop offset="0%" stopColor="#1a237e" />
-                                                        <stop offset="100%" stopColor="#7986cb" />
-                                                    </linearGradient>
-                                                </defs>
-                                                <rect width="100%" height="100%" fill="url(#sky21)" />
-                                                <polygon points="0,130 50,95 100,110 160,80 220,100 280,75 340,95 380,85 380,180 0,180" fill="#2E7D32" opacity="0.3" />
-                                                <polygon points="0,140 40,120 90,130 140,105 200,115 250,95 310,110 350,100 380,110 380,180 0,180" fill="#388E3C" opacity="0.5" />
-
-                                                {["H", "O", "L", "L", "Y", "W", "O", "O", "D"].map((letter, i) => (
-                                                    <text key={i} x={60 + i * 30} y={120 + Math.sin(i * 0.5) * 5} textAnchor="middle" fontSize="28" fill="white" fontWeight="bold" fontFamily="serif" opacity="0.9">{letter}</text>
-                                                ))}
-
-                                                <polygon points="0,155 380,145 380,180 0,180" fill="#33691E" opacity="0.6" />
-                                                {[...Array(18)].map((_, i) => (
-                                                    <line key={i} x1={0} y1={i * 10} x2={380} y2={i * 10} stroke="#000" strokeWidth="0.3" opacity="0.1" />
-                                                ))}
-                                            </svg>
-                                            <div className="absolute top-2 left-2 bg-black/60 px-2 py-0.5 rounded text-[8px] text-[#4ADE80] uppercase">Sat_recon_092</div>
+                                        <div className="overflow-hidden rounded-lg border border-gray-800">
+                                            <Image
+                                                src="/hollywood.jpg"
+                                                alt="Hollywood Sign"
+                                                width={1200}
+                                                height={800}
+                                                className="h-auto w-full object-cover"
+                                                priority
+                                            />
                                         </div>
                                     </motion.div>
                                 ) : (
@@ -275,7 +263,7 @@ const Level16 = ({ onComplete }) => {
                                 <div className="space-y-1 mb-6">
                                     <div className="bg-gray-50 dark:bg-gray-900/20 p-3 rounded-lg border-l-4 border-[#F5A623]">
                                         <span className="font-bold text-gray-700 dark:text-gray-300">/locate</span> <span className="text-blue-600 dark:text-blue-300">[lat] [lon]</span>
-                                        <p className="mt-1 text-gray-600 dark:text-gray-300">Trace GPS coordinates (e.g., /locate 34.13 -118.32)</p>
+                                        <p className="mt-1 text-gray-600 dark:text-gray-300">Trace GPS coordinates (e.g., /locate 34.0907 -118.3266)</p>
                                     </div>
                                     <div className="bg-gray-50 dark:bg-gray-900/20 p-3 rounded-lg border-l-4 border-[#F5A623]">
                                         <span className="font-bold text-gray-700 dark:text-gray-300">/submit</span> <span className="text-blue-600 dark:text-blue-300">[name]</span>
