@@ -63,6 +63,7 @@ const Game = () => {
   const [loading, setLoading] = useState(true);
   const [transitioning, setTransitioning] = useState(false);
   const [userDet, setUserDet] = useState(null);
+  const [selectedLevel, setSelectedLevel] = useState(null);
   const router = useRouter();
 
   const getUserId = () => {
@@ -124,24 +125,35 @@ const Game = () => {
     return <div className="h-screen flex items-center justify-center">Loading...</div>;
   }
 
-  if (userDet?.CL > staticData.maxLevel) {
+  // Allow level selection for testing
+  if (selectedLevel === null) {
     return (
-      <div className="flex items-center justify-center h-screen bg-gradient-to-b from-[#1A1A1A] to-[#111111]">
-        <div className="text-center p-6 bg-white/5 backdrop-blur-md rounded-lg shadow-lg border border-gray-700/30">
-          <h2 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-[#F9DC34] to-[#F5A623]">Well played</h2>
-          <p className="text-gray-300">Come back soon for more levels!</p>
+      <div className="flex items-center justify-center min-h-screen bg-gradient-to-b from-[#1A1A1A] to-[#111111] p-4">
+        <div className="text-center p-8 bg-white/5 backdrop-blur-md rounded-lg shadow-lg border border-gray-700/30 max-w-2xl">
+          <h2 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-[#F9DC34] to-[#F5A623] mb-6">Select a Level</h2>
+          <div className="grid grid-cols-3 sm:grid-cols-4 gap-3 mb-6">
+            {Array.from({ length: staticData.maxLevel }, (_, i) => (
+              <button
+                key={i + 1}
+                onClick={() => setSelectedLevel(i + 1)}
+                className="p-3 bg-gradient-to-r from-[#F9DC34] to-[#F5A623] text-gray-900 font-bold rounded-lg shadow-lg hover:from-[#FFE55C] hover:to-[#FFBD4A] transform transition-transform hover:scale-110"
+              >
+                L{i + 1}
+              </button>
+            ))}
+          </div>
           <button
             onClick={() => router.push("/")}
-            className="mt-4 px-6 py-2 bg-gradient-to-r from-[#F9DC34] to-[#F5A623] text-gray-900 font-bold rounded-lg shadow-lg hover:from-[#FFE55C] hover:to-[#FFBD4A]"
+            className="px-6 py-2 bg-gray-700 hover:bg-gray-600 text-gray-100 font-bold rounded-lg shadow-lg"
           >
-            Return Home
+            Back Home
           </button>
         </div>
       </div>
     );
   }
 
-  const CurrentLevel = levels[userDet?.CL - 1];
+  const CurrentLevel = levels[selectedLevel - 1];
 
   return (
     <div className="w-screen">
@@ -150,7 +162,15 @@ const Game = () => {
           Loading next level...
         </div>
       ) : (
-        <CurrentLevel onComplete={handleLevelComplete} />
+        <>
+          <button
+            onClick={() => setSelectedLevel(null)}
+            className="fixed top-4 left-4 z-50 px-4 py-2 bg-gray-700 hover:bg-gray-600 text-gray-100 font-semibold rounded-lg shadow-lg"
+          >
+            ← Back to Levels
+          </button>
+          <CurrentLevel onComplete={handleLevelComplete} />
+        </>
       )}
     </div>
   );

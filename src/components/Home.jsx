@@ -179,12 +179,12 @@ const Home = () => {
             className="w-full flex flex-col items-center"
           >
             <div className="backdrop-blur-md bg-white/5 rounded-xl p-6 shadow-lg border border-gray-300/20 w-full">
-              {userDet?.CL <= staticData.maxLevel ? (
+              {userDet?.CL <= staticData.maxLevel || true ? (
                 <Link href="/game" className="w-full flex justify-center">
                   <Button 
                     className="w-full py-6 text-xl font-bold bg-gradient-to-r from-[#F9DC34] to-[#F5A623] hover:from-[#FFE55C] hover:to-[#FFBD4A] text-gray-900 rounded-lg shadow-lg transform transition-transform hover:scale-105"
                   >
-                    Play Level {userDet?.CL || 1}
+                    Select Level
                   </Button>
                 </Link>
               ) : (
