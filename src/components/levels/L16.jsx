@@ -1,38 +1,28 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import Image from "next/image";
 import { Input } from "@/components/ui/input";
 import { motion, AnimatePresence } from "framer-motion";
 import { useToast } from "../ui/use-toast";
 import { useCommandHistory } from "@/hooks/useCommandHistory";
 import { ArrowRight } from "lucide-react";
 
-const JUG_5_MAX = 5;
-const JUG_3_MAX = 3;
-const TARGET = 4;
+const CORRECT_ANSWERS = ["hollywood sign", "the hollywood sign", "hollywood"];
 
 const Level16 = ({ onComplete }) => {
     const [inputValue, setInputValue] = useState("");
     const { pushCommand, handleKeyDown: handleHistoryKeys } = useCommandHistory(setInputValue);
     const [isHelpModalOpen, setHelpModalOpen] = useState(false);
     const [isSuccess, setIsSuccess] = useState(false);
-    const [jug5, setJug5] = useState(0);
-    const [jug3, setJug3] = useState(0);
-    const [moveCount, setMoveCount] = useState(0);
+    const [located, setLocated] = useState(false);
+    const [hintUsed, setHintUsed] = useState(false);
     const { toast } = useToast();
-
-    useEffect(() => {
-        if (jug5 === TARGET && !isSuccess) {
-            setIsSuccess(true);
-        }
-    }, [jug5, isSuccess]);
 
     useEffect(() => {
         if (isSuccess) {
             toast({
-                title: "Level Complete! ⚗️",
-                description: `Exactly 4 liters in the 5L jug in ${moveCount} moves!`,
+                title: "Landmark Identified! 🏔️",
+                description: "The Hollywood Sign — Los Angeles, California!",
                 variant: "success",
                 className: "fixed bottom-12 left-1/2 transform -translate-x-1/2 z-50 bg-green-500 text-white opacity-100 border-0 shadow-lg",
             });
@@ -40,7 +30,7 @@ const Level16 = ({ onComplete }) => {
                 onComplete();
             }, 2000);
         }
-    }, [isSuccess, onComplete, toast, moveCount]);
+    }, [isSuccess, onComplete, toast]);
 
     const handleInputChange = (e) => {
         setInputValue(e.target.value);
@@ -52,123 +42,63 @@ const Level16 = ({ onComplete }) => {
         }
     };
 
-    const parseJug = (s) => {
-        const cleaned = s.trim().toLowerCase();
-        if (cleaned === "5l" || cleaned === "5") return 5;
-        if (cleaned === "3l" || cleaned === "3") return 3;
-        return null;
-    };
-
     const handleCommandSubmit = () => {
         pushCommand(inputValue);
         const cmd = inputValue.trim().toLowerCase();
 
-        const fillMatch = cmd.match(/^\/fill\s+(.+)$/i);
-        const emptyMatch = cmd.match(/^\/empty\s+(.+)$/i);
-        const pourMatch = cmd.match(/^\/pour\s+(\S+)\s+(\S+)$/i);
+        const locateMatch = cmd.match(/^\/locate\s+([\d.\-]+)\s+([\d.\-]+)$/i);
+        const submitMatch = cmd.match(/^\/submit\s+(.+)$/i);
+        const hintMatch = cmd.match(/^\/hint$/i);
         const resetMatch = cmd.match(/^\/reset$/i);
         const helpMatch = cmd.match(/^\/help$/i);
 
-        if (fillMatch) {
-            const jug = parseJug(fillMatch[1]);
-            if (jug === 5) {
-                setJug5(JUG_5_MAX);
-                setMoveCount((p) => p + 1);
+        if (locateMatch) {
+            const lat = parseFloat(locateMatch[1]);
+            const lon = parseFloat(locateMatch[2]);
+            // Accept if within ~0.01 degree of the Hollywood Sign coordinates (34.1341, -118.3215)
+            if (Math.abs(lat - 34.13) < 0.1 && Math.abs(lon + 118.32) < 0.1) {
+                setLocated(true);
                 toast({
-                    title: "Filled 5L Jug 💧",
-                    description: "The 5-liter jug is now full.",
-                    variant: "default",
-                    className: "fixed bottom-12 left-1/2 transform -translate-x-1/2 z-50 bg-white dark:bg-[#1A1A1A] opacity-100 shadow-lg",
-                });
-            } else if (jug === 3) {
-                setJug3(JUG_3_MAX);
-                setMoveCount((p) => p + 1);
-                toast({
-                    title: "Filled 3L Jug 💧",
-                    description: "The 3-liter jug is now full.",
+                    title: "📍 Location traced!",
+                    description: "Coordinates match! Visual data recovered.",
                     variant: "default",
                     className: "fixed bottom-12 left-1/2 transform -translate-x-1/2 z-50 bg-white dark:bg-[#1A1A1A] opacity-100 shadow-lg",
                 });
             } else {
                 toast({
-                    title: "Invalid Jug",
-                    description: "Specify 5L or 3L.",
+                    title: "❌ No match",
+                    description: "Those coordinates don't match the signal. Try different values.",
                     variant: "destructive",
                     className: "fixed bottom-12 left-1/2 transform -translate-x-1/2 z-50 bg-red-500 text-white opacity-100 shadow-lg",
                 });
             }
-        } else if (emptyMatch) {
-            const jug = parseJug(emptyMatch[1]);
-            if (jug === 5) {
-                setJug5(0);
-                setMoveCount((p) => p + 1);
-                toast({
-                    title: "Emptied 5L Jug",
-                    description: "The 5-liter jug is now empty.",
-                    variant: "default",
-                    className: "fixed bottom-12 left-1/2 transform -translate-x-1/2 z-50 bg-white dark:bg-[#1A1A1A] opacity-100 shadow-lg",
-                });
-            } else if (jug === 3) {
-                setJug3(0);
-                setMoveCount((p) => p + 1);
-                toast({
-                    title: "Emptied 3L Jug",
-                    description: "The 3-liter jug is now empty.",
-                    variant: "default",
-                    className: "fixed bottom-12 left-1/2 transform -translate-x-1/2 z-50 bg-white dark:bg-[#1A1A1A] opacity-100 shadow-lg",
-                });
+        } else if (submitMatch) {
+            const guess = submitMatch[1].trim().toLowerCase();
+            if (CORRECT_ANSWERS.includes(guess)) {
+                setIsSuccess(true);
             } else {
                 toast({
-                    title: "Invalid Jug",
-                    description: "Specify 5L or 3L.",
+                    title: "Incorrect ❌",
+                    description: `"${submitMatch[1].trim()}" is not the landmark. Use the coordinates and image.`,
                     variant: "destructive",
                     className: "fixed bottom-12 left-1/2 transform -translate-x-1/2 z-50 bg-red-500 text-white opacity-100 shadow-lg",
                 });
             }
-        } else if (pourMatch) {
-            const from = parseJug(pourMatch[1]);
-            const to = parseJug(pourMatch[2]);
-
-            if (!from || !to || from === to) {
-                toast({
-                    title: "Invalid Pour",
-                    description: "Use /pour 5L 3L or /pour 3L 5L",
-                    variant: "destructive",
-                    className: "fixed bottom-12 left-1/2 transform -translate-x-1/2 z-50 bg-red-500 text-white opacity-100 shadow-lg",
-                });
-            } else if (from === 5 && to === 3) {
-                const space = JUG_3_MAX - jug3;
-                const poured = Math.min(jug5, space);
-                setJug5((p) => p - poured);
-                setJug3((p) => p + poured);
-                setMoveCount((p) => p + 1);
-                toast({
-                    title: `Poured ${poured}L → 3L Jug`,
-                    description: `5L: ${jug5 - poured}L | 3L: ${jug3 + poured}L`,
-                    variant: "default",
-                    className: "fixed bottom-12 left-1/2 transform -translate-x-1/2 z-50 bg-white dark:bg-[#1A1A1A] opacity-100 shadow-lg",
-                });
-            } else if (from === 3 && to === 5) {
-                const space = JUG_5_MAX - jug5;
-                const poured = Math.min(jug3, space);
-                setJug3((p) => p - poured);
-                setJug5((p) => p + poured);
-                setMoveCount((p) => p + 1);
-                toast({
-                    title: `Poured ${poured}L → 5L Jug`,
-                    description: `5L: ${jug5 + poured}L | 3L: ${jug3 - poured}L`,
-                    variant: "default",
-                    className: "fixed bottom-12 left-1/2 transform -translate-x-1/2 z-50 bg-white dark:bg-[#1A1A1A] opacity-100 shadow-lg",
-                });
-            }
+        } else if (hintMatch) {
+            setHintUsed(true);
+            toast({
+                title: "Hint 💡",
+                description: "This famous landmark sits on a hillside in Los Angeles and is made of giant white letters.",
+                variant: "default",
+                className: "fixed bottom-12 left-1/2 transform -translate-x-1/2 z-50 bg-white dark:bg-[#1A1A1A] opacity-100 shadow-lg",
+            });
         } else if (resetMatch) {
-            setJug5(0);
-            setJug3(0);
+            setLocated(false);
+            setHintUsed(false);
             setIsSuccess(false);
-            setMoveCount(0);
             toast({
                 title: "Level Reset",
-                description: "Both jugs emptied. Start fresh!",
+                description: "Transmission data restored.",
                 variant: "default",
                 className: "fixed bottom-12 left-1/2 transform -translate-x-1/2 z-50 bg-white dark:bg-[#1A1A1A] opacity-100 shadow-lg",
             });
@@ -186,126 +116,6 @@ const Level16 = ({ onComplete }) => {
         setInputValue("");
     };
 
-    const renderJug = (x, label, capacity, current, color) => {
-        const jugWidth = 60;
-        const jugHeight = 100;
-        const jugY = 100;
-        const innerPad = 3;
-        const innerH = jugHeight - innerPad * 2;
-        const waterHeight = current > 0 ? (current / capacity) * innerH : 0;
-        const clipId = `jug-clip-${capacity}`;
-
-        return (
-            <g>
-                <defs>
-                    <clipPath id={clipId}>
-                        <rect
-                            x={x + innerPad}
-                            y={jugY + innerPad}
-                            width={jugWidth - innerPad * 2}
-                            height={innerH}
-                            rx="3"
-                        />
-                    </clipPath>
-                </defs>
-                <rect
-                    x={x}
-                    y={jugY}
-                    width={jugWidth}
-                    height={jugHeight}
-                    rx="6"
-                    fill="none"
-                    stroke={color}
-                    strokeWidth="2.5"
-                />
-                <rect
-                    x={x + 2}
-                    y={jugY + 2}
-                    width={jugWidth - 4}
-                    height={jugHeight - 4}
-                    rx="4"
-                    fill="#0a0a1a"
-                />
-                <g clipPath={`url(#${clipId})`}>
-                    <motion.rect
-                        x={x + innerPad}
-                        width={jugWidth - innerPad * 2}
-                        rx="3"
-                        fill="#2196F3"
-                        initial={false}
-                        animate={{
-                            height: waterHeight,
-                            y: jugY + jugHeight - innerPad - waterHeight
-                        }}
-                        transition={{ type: "tween", duration: 0.4, ease: "easeOut" }}
-                        opacity="0.8"
-                    />
-                    {current > 0 && (
-                        <motion.line
-                            x1={x + 8}
-                            x2={x + jugWidth - 8}
-                            stroke="#64B5F6"
-                            strokeWidth="1.5"
-                            opacity="0.6"
-                            initial={false}
-                            animate={{
-                                y1: jugY + jugHeight - innerPad - waterHeight + 2,
-                                y2: jugY + jugHeight - innerPad - waterHeight + 2
-                            }}
-                            transition={{ type: "tween", duration: 0.4, ease: "easeOut" }}
-                        />
-                    )}
-                </g>
-                {Array.from({ length: capacity }, (_, i) => {
-                    const markY = jugY + jugHeight - innerPad - ((i + 1) / capacity) * innerH;
-                    return (
-                        <g key={i}>
-                            <line
-                                x1={x + jugWidth - 8}
-                                y1={markY}
-                                x2={x + jugWidth - 2}
-                                y2={markY}
-                                stroke={color}
-                                strokeWidth="1"
-                                opacity="0.4"
-                            />
-                        </g>
-                    );
-                })}
-                <text
-                    x={x + jugWidth / 2}
-                    y={jugY + jugHeight / 2 + 5}
-                    textAnchor="middle"
-                    fontSize="20"
-                    fill="white"
-                    fontWeight="bold"
-                    opacity="0.9"
-                >
-                    {current}L
-                </text>
-                <text
-                    x={x + jugWidth / 2}
-                    y={jugY - 8}
-                    textAnchor="middle"
-                    fontSize="12"
-                    fill={color}
-                    fontWeight="bold"
-                >
-                    {label}
-                </text>
-                <text
-                    x={x + jugWidth / 2}
-                    y={jugY + jugHeight + 18}
-                    textAnchor="middle"
-                    fontSize="10"
-                    fill="#8888BB"
-                >
-                    Max: {capacity}L
-                </text>
-            </g>
-        );
-    };
-
     return (
         <div className="flex flex-col items-center mt-8 max-w-4xl mx-auto px-4">
             <motion.h1
@@ -314,7 +124,7 @@ const Level16 = ({ onComplete }) => {
                 transition={{ duration: 0.6 }}
                 className="px-6 py-3 text-2xl font-bold text-[#1A1A1A] dark:text-[#111111] bg-gradient-to-r from-[#F9DC34] to-[#F5A623] rounded-full shadow-lg"
             >
-                Level 12
+                Level 16
             </motion.h1>
 
             <motion.p
@@ -323,33 +133,100 @@ const Level16 = ({ onComplete }) => {
                 transition={{ duration: 0.6, delay: 0.2 }}
                 className="mt-8 text-xl font-semibold mb-4 text-center text-gray-900 dark:text-[#F9DC34]"
             >
-                Measure exactly 4 Liters in the 5L jug.
+                The Landmark Trace — I wonder where this leads...
             </motion.p>
 
             <motion.div
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.6, delay: 0.3 }}
-                className="bg-white dark:bg-[#1A1A1A]/40 rounded-2xl p-6 shadow-lg backdrop-blur-sm border border-gray-200 dark:border-gray-700/30 w-full max-w-md relative overflow-hidden"
+                className="w-full max-w-md"
             >
-                <svg viewBox="0 0 380 260" className="w-full">
-                    {[...Array(16)].map((_, i) => (
-                        <line key={`vg${i}`} x1={i * 25} y1={0} x2={i * 25} y2={260} stroke="#1a1a3a" strokeWidth="0.5" opacity="0.1" />
-                    ))}
-                    {[...Array(11)].map((_, i) => (
-                        <line key={`hg${i}`} x1={0} y1={i * 25} x2={380} y2={i * 25} stroke="#1a1a3a" strokeWidth="0.5" opacity="0.1" />
-                    ))}
+                <div className="bg-white dark:bg-[#1A1A1A]/40 rounded-2xl p-6 shadow-lg backdrop-blur-sm border border-gray-200 dark:border-gray-700/30">
+                    <div className="bg-[#1a1a2e] rounded-xl overflow-hidden shadow-inner border border-gray-800">
+                        {/* Terminal bar */}
+                        <div className="flex items-center justify-between bg-[#111] px-3 py-2 border-b border-[#222]">
+                            <div className="flex gap-1.5">
+                                <div className="w-2.5 h-2.5 rounded-full bg-[#ef4444]" />
+                                <div className="w-2.5 h-2.5 rounded-full bg-[#F9DC34]" />
+                                <div className="w-2.5 h-2.5 rounded-full bg-[#22c55e]" />
+                            </div>
+                            <span className="text-[10px] text-gray-500 font-mono tracking-widest uppercase">GPS Terminal</span>
+                            <span className="text-[10px] text-[#ef4444] font-mono animate-pulse">● LIVE</span>
+                        </div>
 
-                    {renderJug(110, "5L JUG", JUG_5_MAX, jug5, "#F9DC34")}
-                    {renderJug(220, "3L JUG", JUG_3_MAX, jug3, "#A78BFA")}
+                        {/* Terminal content */}
+                        <div className="p-5 font-mono text-sm bg-[#0a0a12]">
+                            <p className="text-[#4ADE80] text-[10px] mb-4 tracking-tighter uppercase">▸ Initializing signal scan...</p>
 
-                    <g opacity="0.3">
-                        <line x1="175" y1="140" x2="215" y2="140" stroke="#F9DC34" strokeWidth="1.5" />
-                        <polygon points="213,136 220,140 213,144" fill="#F9DC34" />
-                        <line x1="215" y1="155" x2="175" y2="155" stroke="#A78BFA" strokeWidth="1.5" />
-                        <polygon points="177,151 170,155 177,159" fill="#A78BFA" />
-                    </g>
-                </svg>
+                            <div className="border border-gray-800 rounded-lg p-4 mb-4 bg-[#0d0d1a]">
+                                <div className="flex items-center gap-2 mb-3">
+                                    <span className="text-[#ef4444] animate-pulse">📡</span>
+                                    <span className="text-gray-500 text-[10px] uppercase">Status: ENCRYPTED_STREAM</span>
+                                </div>
+
+                                <div className="space-y-3">
+                                    <div className="flex items-center gap-3">
+                                        <span className="text-gray-600 text-[10px] w-12 uppercase">Latitude</span>
+                                        <motion.span animate={{ opacity: [1, 0.4, 1] }} transition={{ repeat: Infinity, duration: 1.5 }} className="text-[#F9DC34] text-lg font-bold tracking-widest font-mono">
+                                            34.????
+                                        </motion.span>
+                                    </div>
+                                    <div className="flex items-center gap-3">
+                                        <span className="text-gray-600 text-[10px] w-12 uppercase">Longitude</span>
+                                        <motion.span animate={{ opacity: [1, 0.4, 1] }} transition={{ repeat: Infinity, duration: 1.5, delay: 0.5 }} className="text-[#F9DC34] text-lg font-bold tracking-widest font-mono">
+                                            -118.????
+                                        </motion.span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <AnimatePresence>
+                                {located ? (
+                                    <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }}>
+                                        <p className="text-[#4ADE80] text-[10px] mb-3 uppercase tracking-tighter">▸ Visual data stream established</p>
+                                        <div className="border border-gray-800 rounded-lg overflow-hidden bg-[#0d0d1a] relative">
+                                            <svg viewBox="0 0 380 180" className="w-full">
+                                                <defs>
+                                                    <linearGradient id="sky21" x1="0" y1="0" x2="0" y2="1">
+                                                        <stop offset="0%" stopColor="#1a237e" />
+                                                        <stop offset="100%" stopColor="#7986cb" />
+                                                    </linearGradient>
+                                                </defs>
+                                                <rect width="100%" height="100%" fill="url(#sky21)" />
+                                                <polygon points="0,130 50,95 100,110 160,80 220,100 280,75 340,95 380,85 380,180 0,180" fill="#2E7D32" opacity="0.3" />
+                                                <polygon points="0,140 40,120 90,130 140,105 200,115 250,95 310,110 350,100 380,110 380,180 0,180" fill="#388E3C" opacity="0.5" />
+
+                                                {["H", "O", "L", "L", "Y", "W", "O", "O", "D"].map((letter, i) => (
+                                                    <text key={i} x={60 + i * 30} y={120 + Math.sin(i * 0.5) * 5} textAnchor="middle" fontSize="28" fill="white" fontWeight="bold" fontFamily="serif" opacity="0.9">{letter}</text>
+                                                ))}
+
+                                                <polygon points="0,155 380,145 380,180 0,180" fill="#33691E" opacity="0.6" />
+                                                {[...Array(18)].map((_, i) => (
+                                                    <line key={i} x1={0} y1={i * 10} x2={380} y2={i * 10} stroke="#000" strokeWidth="0.3" opacity="0.1" />
+                                                ))}
+                                            </svg>
+                                            <div className="absolute top-2 left-2 bg-black/60 px-2 py-0.5 rounded text-[8px] text-[#4ADE80] uppercase">Sat_recon_092</div>
+                                        </div>
+                                    </motion.div>
+                                ) : (
+                                    <p className="text-gray-600 text-[10px] uppercase leading-relaxed">
+                                        ▸ Enter coordinates to clarify stream...<br />
+                                        ▸ Hint: City of Angels
+                                    </p>
+                                )}
+                            </AnimatePresence>
+
+                            {hintUsed && (
+                                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-4 p-3 rounded bg-yellow-500/10 border border-yellow-500/20">
+                                    <p className="text-[#F9DC34] text-[10px] leading-relaxed">
+                                        💡 The landmark consists of giant white letters on a hillside in Los Angeles.
+                                    </p>
+                                </motion.div>
+                            )}
+                        </div>
+                    </div>
+                </div>
             </motion.div>
 
             <motion.span
@@ -359,11 +236,7 @@ const Level16 = ({ onComplete }) => {
                 className="mx-10 my-6 text-center cursor-pointer text-gray-700 dark:text-gray-300 hover:text-[#F5A623] dark:hover:text-[#F9DC34] transition-colors"
                 onClick={() => setHelpModalOpen(true)}
             >
-                Type{" "}
-                <span className="font-mono bg-gray-100 dark:bg-gray-900/30 px-2 py-1 rounded">
-                    /help
-                </span>{" "}
-                to get commands and hints
+                Type <span className="font-mono bg-gray-100 dark:bg-gray-900/30 px-2 py-1 rounded">/help</span> to get commands and hints
             </motion.span>
 
             <motion.div
@@ -398,54 +271,30 @@ const Level16 = ({ onComplete }) => {
                             className="bg-white dark:bg-[#1A1A1A] rounded-xl overflow-hidden shadow-2xl max-w-md w-full mx-4 max-h-[80vh] flex flex-col"
                         >
                             <div className="p-6 overflow-y-auto flex-grow">
-                                <h2 className="text-2xl font-bold mb-4 text-gray-800 dark:text-[#F9DC34]">
-                                    Available Commands:
-                                </h2>
+                                <h2 className="text-2xl font-bold mb-4 text-gray-800 dark:text-[#F9DC34]">Available Commands:</h2>
                                 <div className="space-y-1 mb-6">
                                     <div className="bg-gray-50 dark:bg-gray-900/20 p-3 rounded-lg border-l-4 border-[#F5A623]">
-                                        <span className="font-bold text-gray-700 dark:text-gray-300">/fill</span>{" "}
-                                        <span className="text-blue-600 dark:text-blue-300">[5L or 3L]</span>
-                                        <p className="mt-1 text-gray-600 dark:text-gray-300">Fill a jug completely from the tap.</p>
+                                        <span className="font-bold text-gray-700 dark:text-gray-300">/locate</span> <span className="text-blue-600 dark:text-blue-300">[lat] [lon]</span>
+                                        <p className="mt-1 text-gray-600 dark:text-gray-300">Trace GPS coordinates (e.g., /locate 34.13 -118.32)</p>
                                     </div>
-
                                     <div className="bg-gray-50 dark:bg-gray-900/20 p-3 rounded-lg border-l-4 border-[#F5A623]">
-                                        <span className="font-bold text-gray-700 dark:text-gray-300">/empty</span>{" "}
-                                        <span className="text-blue-600 dark:text-blue-300">[5L or 3L]</span>
-                                        <p className="mt-1 text-gray-600 dark:text-gray-300">Empty a jug into the drain.</p>
+                                        <span className="font-bold text-gray-700 dark:text-gray-300">/submit</span> <span className="text-blue-600 dark:text-blue-300">[name]</span>
+                                        <p className="mt-1 text-gray-600 dark:text-gray-300">Submit identified landmark name.</p>
                                     </div>
-
                                     <div className="bg-gray-50 dark:bg-gray-900/20 p-3 rounded-lg border-l-4 border-[#F5A623]">
-                                        <span className="font-bold text-gray-700 dark:text-gray-300">/pour</span>{" "}
-                                        <span className="text-blue-600 dark:text-blue-300">[from] [to]</span>
-                                        <p className="mt-1 text-gray-600 dark:text-gray-300">Pour water from one jug to another (e.g., /pour 5L 3L).</p>
+                                        <span className="font-bold text-gray-700 dark:text-gray-300">/hint</span>
+                                        <p className="mt-1 text-gray-600 dark:text-gray-300">Unlock a tactical hint.</p>
                                     </div>
-
                                     <div className="bg-gray-50 dark:bg-gray-900/20 p-3 rounded-lg border-l-4 border-[#F5A623]">
                                         <span className="font-bold text-gray-700 dark:text-gray-300">/reset</span>
-                                        <p className="mt-1 text-gray-600 dark:text-gray-300">Reset the level.</p>
-                                    </div>
-
-                                    <div className="bg-gray-50 dark:bg-gray-900/20 p-3 rounded-lg border-l-4 border-[#F5A623]">
-                                        <span className="font-bold text-gray-700 dark:text-gray-300">/help</span>
-                                        <p className="mt-1 text-gray-600 dark:text-gray-300">Show available commands and hints.</p>
+                                        <p className="mt-1 text-gray-600 dark:text-gray-300">Re-initialize terminal.</p>
                                     </div>
                                 </div>
-
-                                <h3 className="text-xl font-bold mb-2 text-gray-800 dark:text-[#F9DC34]">
-                                    Hint:
-                                </h3>
-                                <p className="text-gray-600 dark:text-gray-300 italic">
-                                    Three and five make eight, but four is the middle path you must forge.
-                                </p>
+                                <h3 className="text-xl font-bold mb-2 text-gray-800 dark:text-[#F9DC34]">Hint:</h3>
+                                <p className="text-gray-600 dark:text-gray-300 italic">The city of angels holds a famous sign on its hills.</p>
                             </div>
-
                             <div className="bg-gray-50 dark:bg-gray-900/30 px-6 py-4 text-center">
-                                <button
-                                    onClick={() => setHelpModalOpen(false)}
-                                    className="bg-gradient-to-r from-[#F9DC34] to-[#F5A623] hover:from-[#FFE55C] hover:to-[#FFBD4A] px-6 py-2 rounded-lg text-gray-900 font-medium shadow-md transition-transform hover:scale-105"
-                                >
-                                    Close
-                                </button>
+                                <button onClick={() => setHelpModalOpen(false)} className="bg-gradient-to-r from-[#F9DC34] to-[#F5A623] hover:from-[#FFE55C] hover:to-[#FFBD4A] px-6 py-2 rounded-lg text-gray-900 font-medium shadow-md transition-transform hover:scale-105">Close</button>
                             </div>
                         </motion.div>
                     </div>

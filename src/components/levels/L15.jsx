@@ -9,7 +9,7 @@ import { ArrowRight } from "lucide-react";
 
 const CORRECT_NAME = "rick astley";
 
-const Level20 = ({ onComplete }) => {
+const Level15 = ({ onComplete }) => {
     const [inputValue, setInputValue] = useState("");
     const { pushCommand, handleKeyDown: handleHistoryKeys } = useCommandHistory(setInputValue);
     const [isHelpModalOpen, setHelpModalOpen] = useState(false);
@@ -369,4 +369,4 @@ const Level20 = ({ onComplete }) => {
     );
 };
 
-export default Level20;
+export default Level15;

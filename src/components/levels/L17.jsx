@@ -1,63 +1,63 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
+import Image from "next/image";
 import { Input } from "@/components/ui/input";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { useToast } from "../ui/use-toast";
 import { useCommandHistory } from "@/hooks/useCommandHistory";
-import { ArrowRight } from "lucide-react";
-
-const TOTAL_COINS = 12;
-const MAX_WEIGHINGS = 3;
+import { Thermometer, Lightbulb } from "lucide-react";
 
 const Level17 = ({ onComplete }) => {
     const [inputValue, setInputValue] = useState("");
     const { pushCommand, handleKeyDown: handleHistoryKeys } = useCommandHistory(setInputValue);
     const [isHelpModalOpen, setHelpModalOpen] = useState(false);
     const [isSuccess, setIsSuccess] = useState(false);
-    const [isFailed, setIsFailed] = useState(false);
-    const [fakeCoin, setFakeCoin] = useState(null);
-    const [weighingsLeft, setWeighingsLeft] = useState(MAX_WEIGHINGS);
-    const [weighHistory, setWeighHistory] = useState([]);
-    const [scaleState, setScaleState] = useState("balanced");
-    const [leftPan, setLeftPan] = useState([]); // coin IDs on left pan
-    const [rightPan, setRightPan] = useState([]); // coin IDs on right pan
-    const { toast } = useToast();
-    const initialized = useRef(false);
 
+    // Game State
+    const [switches, setSwitches] = useState({ A: false, B: false, C: false });
+    const [roomEntered, setRoomEntered] = useState(false);
+    const [bulbTemp, setBulbTemp] = useState(0); // 0 to 100
+    const [targetSwitch, setTargetSwitch] = useState(null);
+
+    const { toast } = useToast();
+
+    // Initialize random target switch
     useEffect(() => {
-        if (!initialized.current) {
-            initialized.current = true;
-            setFakeCoin(Math.floor(Math.random() * TOTAL_COINS) + 1);
-        }
+        const targets = ["A", "B", "C"];
+        const randomTarget = targets[Math.floor(Math.random() * targets.length)];
+        setTargetSwitch(randomTarget);
     }, []);
+
+
 
     useEffect(() => {
         if (isSuccess) {
-            const weighingsUsed = MAX_WEIGHINGS - weighingsLeft;
-
-            if (weighingsUsed < 3) {
-                toast({
-                    title: "Wait... That's a Bluff! 🤔",
-                    description: "You can't identify the fake coin in less than 3 weighings without seeing the results!",
-                    variant: "destructive",
-                    className: "fixed bottom-12 left-1/2 transform -translate-x-1/2 z-50 bg-red-500 text-white opacity-100 shadow-lg",
-                });
-                setIsSuccess(false);
-                return;
-            }
-
             toast({
-                title: "Correct! 🪙",
-                description: `Coin ${fakeCoin} was the fake! Found in ${weighingsUsed} turn(s).`,
+                title: "Correct Switch Identified! 💡",
+                description: "Logic prevails. Access granted.",
                 variant: "success",
-                className: "fixed bottom-12 left-1/2 transform -translate-x-1/2 z-50 bg-green-500 text-white opacity-100 border-0 shadow-lg",
             });
             setTimeout(() => {
                 onComplete();
             }, 2000);
         }
-    }, [isSuccess, onComplete, toast, fakeCoin, weighingsLeft]);
+    }, [isSuccess, onComplete, toast]);
+
+    const addLog = (msg) => {
+        if (msg.includes("[LOCKED]") || msg.includes("Invalid")) {
+            toast({
+                title: "Action Failed",
+                description: msg.replace(/^> /, ""),
+                variant: "destructive"
+            });
+        } else if (msg.includes("Waiting")) {
+            toast({
+                title: "Time Passing...",
+                description: msg.replace(/^> /, ""),
+            });
+        }
+    };
 
     const handleInputChange = (e) => {
         setInputValue(e.target.value);
@@ -69,226 +69,156 @@ const Level17 = ({ onComplete }) => {
         }
     };
 
-    const parseCoins = (str) => {
-        const parts = str.split(",").map((s) => parseInt(s.trim()));
-        if (parts.some((n) => isNaN(n) || n < 1 || n > TOTAL_COINS)) return null;
-        if (new Set(parts).size !== parts.length) return null;
-        return parts;
-    };
-
     const handleCommandSubmit = () => {
-        pushCommand(inputValue);
+        if (!inputValue.trim()) return;
+
         const cmd = inputValue.trim();
+        pushCommand(cmd);
 
-        const weighMatch = cmd.match(/^\/weigh\s+(.+?)\s+(?:vs\s+)?(.+)$/i);
-        const guessMatch = cmd.match(/^\/guess\s+(\d+)$/i);
-        const resetMatch = cmd.match(/^\/reset$/i);
-        const helpMatch = cmd.match(/^\/help$/i);
+        // Command parsing
+        const lowerCmd = cmd.toLowerCase();
 
-
-
-        if (isFailed && !resetMatch && !helpMatch) {
-            toast({
-                title: "No Weighings Left",
-                description: "Use /reset to try again.",
-                variant: "destructive",
-                className: "fixed bottom-12 left-1/2 transform -translate-x-1/2 z-50 bg-red-500 text-white opacity-100 shadow-lg",
-            });
-            setInputValue("");
-            return;
-        }
-
-        if (weighMatch) {
-            if (weighingsLeft <= 0) {
-                toast({
-                    title: "No Weighings Left!",
-                    description: "You've used all 3 weighings. Make your /guess now!",
-                    variant: "destructive",
-                    className: "fixed bottom-12 left-1/2 transform -translate-x-1/2 z-50 bg-red-500 text-white opacity-100 shadow-lg",
-                });
-                setInputValue("");
-                return;
-            }
-
-            const leftCoins = parseCoins(weighMatch[1]);
-            const rightCoins = parseCoins(weighMatch[2]);
-
-            if (!leftCoins || !rightCoins) {
-                toast({
-                    title: "Invalid Coins",
-                    description: "Use coin numbers 1-12 separated by commas. e.g., /weigh 1,2,3,4 5,6,7,8",
-                    variant: "destructive",
-                    className: "fixed bottom-12 left-1/2 transform -translate-x-1/2 z-50 bg-red-500 text-white opacity-100 shadow-lg",
-                });
-                setInputValue("");
-                return;
-            }
-
-            if (leftCoins.length !== rightCoins.length) {
-                toast({
-                    title: "Uneven Groups",
-                    description: "Both sides must have the same number of coins.",
-                    variant: "destructive",
-                    className: "fixed bottom-12 left-1/2 transform -translate-x-1/2 z-50 bg-red-500 text-white opacity-100 shadow-lg",
-                });
-                setInputValue("");
-                return;
-            }
-
-            const overlap = leftCoins.some((c) => rightCoins.includes(c));
-            if (overlap) {
-                toast({
-                    title: "Duplicate Coins",
-                    description: "A coin can't be on both sides of the scale!",
-                    variant: "destructive",
-                    className: "fixed bottom-12 left-1/2 transform -translate-x-1/2 z-50 bg-red-500 text-white opacity-100 shadow-lg",
-                });
-                setInputValue("");
-                return;
-            }
-
-            const fakeOnLeft = leftCoins.includes(fakeCoin);
-            const fakeOnRight = rightCoins.includes(fakeCoin);
-
-            let result;
-            if (fakeOnLeft) {
-                result = "left-lighter";
-                setScaleState("left-lighter");
-            } else if (fakeOnRight) {
-                result = "right-lighter";
-                setScaleState("right-lighter");
-            } else {
-                result = "equal";
-                setScaleState("balanced");
-            }
-
-            setLeftPan(leftCoins);
-            setRightPan(rightCoins);
-            setWeighingsLeft((p) => p - 1);
-
-            setWeighHistory((prev) => [
-                ...prev,
-                { left: leftCoins, right: rightCoins, result },
-            ]);
-
-            const resultText =
-                result === "equal"
-                    ? "⚖️ Both sides are equal!"
-                    : result === "left-lighter"
-                        ? "⬅️ Left side is LIGHTER!"
-                        : "➡️ Right side is LIGHTER!";
-
-            toast({
-                title: resultText,
-                description: `Weighings remaining: ${weighingsLeft - 1}`,
-                variant: "default",
-                className: "fixed bottom-12 left-1/2 transform -translate-x-1/2 z-50 bg-white dark:bg-[#1A1A1A] opacity-100 shadow-lg",
-            });
-        } else if (guessMatch) {
-            const coinNum = parseInt(guessMatch[1]);
-            if (coinNum < 1 || coinNum > TOTAL_COINS) {
-                toast({
-                    title: "Invalid Coin",
-                    description: "Choose a coin from 1 to 12.",
-                    variant: "destructive",
-                    className: "fixed bottom-12 left-1/2 transform -translate-x-1/2 z-50 bg-red-500 text-white opacity-100 shadow-lg",
-                });
-            } else if (coinNum === fakeCoin) {
-                setIsSuccess(true);
-            } else {
-                setIsFailed(true);
-                toast({
-                    title: "Wrong! 💀",
-                    description: `Coin ${coinNum} is real. The fake was coin ${fakeCoin}.`,
-                    variant: "destructive",
-                    className: "fixed bottom-12 left-1/2 transform -translate-x-1/2 z-50 bg-red-500 text-white opacity-100 shadow-lg",
-                });
-            }
-        } else if (resetMatch) {
-            initialized.current = true;
-            setFakeCoin(Math.floor(Math.random() * TOTAL_COINS) + 1);
-            setWeighingsLeft(MAX_WEIGHINGS);
-            setWeighHistory([]);
-            setScaleState("balanced");
-            setLeftPan([]);
-            setRightPan([]);
-            setIsSuccess(false);
-            setIsFailed(false);
-            toast({
-                title: "Level Reset",
-                description: "A new fake coin has been placed. Good luck!",
-                variant: "default",
-                className: "fixed bottom-12 left-1/2 transform -translate-x-1/2 z-50 bg-white dark:bg-[#1A1A1A] opacity-100 shadow-lg",
-            });
-        } else if (helpMatch) {
+        if (lowerCmd === "/help") {
             setHelpModalOpen(true);
+        } else if (lowerCmd.startsWith("/flip ")) {
+            handleFlip(lowerCmd.split(" ")[1]);
+        } else if (lowerCmd.startsWith("/wait ")) {
+            handleWait(lowerCmd.split(" ")[1]);
+        } else if (lowerCmd === "/enter_room") {
+            handleEnterRoom();
+        } else if (lowerCmd.startsWith("/submit ")) {
+            handleSubmit(lowerCmd.split(" ")[1]);
         } else {
+            addLog(`> Unknown command: ${cmd}`);
             toast({
                 title: "Unknown Command",
-                description: "Type /help to see available commands",
+                description: "Type /help for valid commands.",
                 variant: "destructive",
-                className: "fixed bottom-12 left-1/2 transform -translate-x-1/2 z-50 bg-red-500 text-white opacity-100 shadow-lg",
             });
         }
 
         setInputValue("");
     };
 
-    const tiltAngle =
-        scaleState === "left-lighter" ? 8 : scaleState === "right-lighter" ? -8 : 0;
+    const handleFlip = (switchName) => {
+        if (roomEntered) {
+            addLog("> [LOCKED] Cannot flip switches after entering the room.");
+            return;
+        }
 
-    const getScaleLayout = (count) => {
-        if (count <= 3) return { perRow: 3, spacing: 18, coinR: 9 };
-        if (count <= 4) return { perRow: 2, spacing: 16, coinR: 8 };
-        return { perRow: 3, spacing: 14, coinR: 7 };
+        const s = switchName?.toUpperCase();
+        if (!["A", "B", "C"].includes(s)) {
+            addLog("> Invalid switch. Use A, B, or C.");
+            return;
+        }
+
+        setSwitches(prev => {
+            const newState = { ...prev, [s]: !prev[s] };
+            addLog(`> Switch ${s} turned ${newState[s] ? "ON" : "OFF"}.`);
+            return newState;
+        });
     };
 
-    const getCoinPosition = (coinNum) => {
-        const leftIdx = leftPan.indexOf(coinNum);
-        const rightIdx = rightPan.indexOf(coinNum);
-
-        if (leftIdx !== -1) {
-            const { perRow, spacing } = getScaleLayout(leftPan.length);
-            const row = Math.floor(leftIdx / perRow);
-            const col = leftIdx % perRow;
-            const totalInRow = Math.min(perRow, leftPan.length - row * perRow);
-            const startX = 80 - (totalInRow * spacing) / 2;
-            return { x: startX + col * spacing, y: 127 + row * spacing, onScale: true, side: "left" };
+    const handleWait = (minutesStr) => {
+        if (roomEntered) {
+            addLog("> [LOCKED] Cannot wait. You are in the room.");
+            return;
         }
 
-        if (rightIdx !== -1) {
-            const { perRow, spacing } = getScaleLayout(rightPan.length);
-            const row = Math.floor(rightIdx / perRow);
-            const col = rightIdx % perRow;
-            const totalInRow = Math.min(perRow, rightPan.length - row * perRow);
-            const startX = 300 - (totalInRow * spacing) / 2;
-            return { x: startX + col * spacing, y: 127 + row * spacing, onScale: true, side: "right" };
+        const minutes = parseInt(minutesStr);
+        if (isNaN(minutes) || minutes <= 0) {
+            addLog("> Invalid time. Usage: /wait [minutes]");
+            return;
         }
 
-        const groundCoins = [];
-        for (let i = 1; i <= TOTAL_COINS; i++) {
-            if (!leftPan.includes(i) && !rightPan.includes(i)) {
-                groundCoins.push(i);
-            }
+        addLog(`> Waiting for ${minutes} minute(s)...`);
+
+        // Calculate temp change
+        // Logic: 
+        // If target switch is ON: Temp increases
+        // If target switch is OFF: Temp decreases (cools down)
+
+        let tempChange = 0;
+        const isTargetOn = switches[targetSwitch];
+
+        if (isTargetOn) {
+            // Heating up: +10 per minute
+            tempChange = minutes * 10;
+        } else {
+            // Cooling down: -5 per minute
+            tempChange = -(minutes * 5);
         }
-        const groundIdx = groundCoins.indexOf(coinNum);
-        const perRow = 6;
-        const row = Math.floor(groundIdx / perRow);
-        const col = groundIdx % perRow;
-        const totalInRow = Math.min(perRow, groundCoins.length - row * perRow);
-        const startX = 190 - (totalInRow * 30) / 2;
-        return { x: startX + col * 30, y: 215 + row * 28, onScale: false, side: "ground" };
+
+        setBulbTemp(prev => {
+            let newTemp = prev + tempChange;
+            // Clamp between 0 and 100
+            if (newTemp > 100) newTemp = 100;
+            if (newTemp < 0) newTemp = 0;
+            return newTemp;
+        });
+    };
+
+    const handleEnterRoom = () => {
+        if (roomEntered) {
+            addLog("> You are already inside the room.");
+            return;
+        }
+        setRoomEntered(true);
+        addLog("> You open the steel door and step inside.");
+        addLog("> The door locks behind you. Switches are no longer accessible.");
+
+        // Check bulb state immediately for feedback
+        const isLightOn = switches[targetSwitch];
+        if (isLightOn) {
+            addLog("> The room is brightly LIT.");
+        } else {
+            addLog("> The room is DARK.");
+        }
+
+        // Thermal feedback
+        if (bulbTemp > 50) {
+            addLog("> You feel RADIATING HEAT from the bulb.");
+        } else if (bulbTemp > 20) {
+            addLog("> The bulb is WARM to the touch.");
+        } else {
+            addLog("> The bulb is COLD.");
+        }
+    };
+
+    const handleSubmit = (answer) => {
+        if (!roomEntered) {
+            addLog("> You must enter the room before submitting your answer.");
+            return;
+        }
+
+        const ans = answer?.toUpperCase();
+        if (!["A", "B", "C"].includes(ans)) {
+            addLog("> Invalid answer. Usage: /submit [A|B|C]");
+            return;
+        }
+
+        if (ans === targetSwitch) {
+            addLog(`> CORRECT. Switch ${ans} controls the bulb.`);
+            setIsSuccess(true);
+        } else {
+            addLog(`> INCORRECT. Switch ${ans} is not the correct one.`);
+            toast({
+                title: "Wrong Answer ❌",
+                description: "Logic flaw detected. Sequence failed.",
+                variant: "destructive",
+            });
+        }
     };
 
     return (
-        <div className="flex flex-col items-center mt-8 max-w-4xl mx-auto px-4">
+        <div className="flex flex-col items-center mt-8 max-w-4xl mx-auto px-4 w-full">
             <motion.h1
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6 }}
                 className="px-6 py-3 text-2xl font-bold text-[#1A1A1A] dark:text-[#111111] bg-gradient-to-r from-[#F9DC34] to-[#F5A623] rounded-full shadow-lg"
             >
-                Level 13
+                Level 17
             </motion.h1>
 
             <motion.p
@@ -297,210 +227,222 @@ const Level17 = ({ onComplete }) => {
                 transition={{ duration: 0.6, delay: 0.2 }}
                 className="mt-8 text-xl font-semibold mb-4 text-center text-gray-900 dark:text-[#F9DC34]"
             >
-                The 12-Coin Balance — Find the fake coin.
+                The Light Bulb Challenge
             </motion.p>
 
-            <motion.div
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.6, delay: 0.3 }}
-                className="bg-white dark:bg-[#1A1A1A]/40 rounded-2xl p-6 shadow-lg backdrop-blur-sm border border-gray-200 dark:border-gray-700/30 w-full max-w-md relative overflow-hidden"
-            >
-                <svg viewBox="0 0 380 300" className="w-full">
-                    {[...Array(16)].map((_, i) => (
-                        <line key={`v${i}`} x1={i * 25} y1={0} x2={i * 25} y2={280} stroke="#1a1a3a" strokeWidth="0.5" opacity="0.1" />
-                    ))}
-                    {[...Array(12)].map((_, i) => (
-                        <line key={`h${i}`} x1={0} y1={i * 25} x2={380} y2={i * 25} stroke="#1a1a3a" strokeWidth="0.5" opacity="0.1" />
-                    ))}
-
-                    <rect x="185" y="100" width="10" height="65" fill="#795548" rx="2" />
-                    <rect x="170" y="160" width="40" height="8" rx="3" fill="#5D4037" />
-                    <polygon points="190,95 180,105 200,105" fill="#5D4037" />
-
-                    <motion.g
-                        animate={{ rotate: tiltAngle }}
-                        transition={{ type: "spring", stiffness: 150, damping: 20 }}
-                        style={{ originX: "190px", originY: "100px" }}
-                    >
-                        <rect x="45" y="96" width="290" height="7" rx="3" fill="#8D6E63" />
-                        <line x1="65" y1="103" x2="55" y2="145" stroke="#A1887F" strokeWidth="2" />
-                        <line x1="95" y1="103" x2="105" y2="145" stroke="#A1887F" strokeWidth="2" />
-                        <ellipse cx="80" cy="148" rx="45" ry="10" fill="#8D6E63" stroke="#6D4C41" strokeWidth="1.5" />
-                        <text x="80" y="165" textAnchor="middle" fontSize="9" fill="#BCAAA4">LEFT</text>
-
-                        <line x1="285" y1="103" x2="275" y2="145" stroke="#A1887F" strokeWidth="2" />
-                        <line x1="315" y1="103" x2="325" y2="145" stroke="#A1887F" strokeWidth="2" />
-                        <ellipse cx="300" cy="148" rx="45" ry="10" fill="#8D6E63" stroke="#6D4C41" strokeWidth="1.5" />
-                        <text x="300" y="165" textAnchor="middle" fontSize="9" fill="#BCAAA4">RIGHT</text>
-
-                        {leftPan.map((coinNum, i) => {
-                            const pos = getCoinPosition(coinNum);
-                            const { coinR } = getScaleLayout(leftPan.length);
-                            return (
-                                <motion.g
-                                    key={`scale-L-${coinNum}`}
-                                    initial={{ y: 100, opacity: 0 }}
-                                    animate={{ y: 0, opacity: 1 }}
-                                    transition={{ duration: 0.4, delay: i * 0.05 }}
-                                >
-                                    <circle
-                                        cx={pos.x}
-                                        cy={pos.y}
-                                        r={coinR}
-                                        fill={isSuccess && coinNum === fakeCoin ? "#ef4444" : isFailed && coinNum === fakeCoin ? "#ef4444" : "#F9DC34"}
-                                        stroke={isSuccess && coinNum === fakeCoin ? "#dc2626" : isFailed && coinNum === fakeCoin ? "#dc2626" : "#F5A623"}
-                                        strokeWidth="1.5"
-                                    />
-                                    <text x={pos.x} y={pos.y + 3.5} textAnchor="middle" fontSize="8" fill="#2D1B4B" fontWeight="bold">
-                                        {coinNum}
-                                    </text>
-                                </motion.g>
-                            );
-                        })}
-
-                        {rightPan.map((coinNum, i) => {
-                            const pos = getCoinPosition(coinNum);
-                            const { coinR } = getScaleLayout(rightPan.length);
-                            return (
-                                <motion.g
-                                    key={`scale-R-${coinNum}`}
-                                    initial={{ y: 100, opacity: 0 }}
-                                    animate={{ y: 0, opacity: 1 }}
-                                    transition={{ duration: 0.4, delay: i * 0.05 }}
-                                >
-                                    <circle
-                                        cx={pos.x}
-                                        cy={pos.y}
-                                        r={coinR}
-                                        fill={isSuccess && coinNum === fakeCoin ? "#ef4444" : isFailed && coinNum === fakeCoin ? "#ef4444" : "#F9DC34"}
-                                        stroke={isSuccess && coinNum === fakeCoin ? "#dc2626" : isFailed && coinNum === fakeCoin ? "#dc2626" : "#F5A623"}
-                                        strokeWidth="1.5"
-                                    />
-                                    <text x={pos.x} y={pos.y + 3.5} textAnchor="middle" fontSize="8" fill="#2D1B4B" fontWeight="bold">
-                                        {coinNum}
-                                    </text>
-                                </motion.g>
-                            );
-                        })}
-                    </motion.g>
-
-                    <line x1="30" y1="200" x2="350" y2="200" stroke="#333355" strokeWidth="1" strokeDasharray="4 4" opacity="0.3" />
-                    <text x="190" y="195" textAnchor="middle" fontSize="8" fill="#555577">COINS ON THE TABLE</text>
-
-                    {Array.from({ length: TOTAL_COINS }, (_, i) => {
-                        const coinNum = i + 1;
-                        if (leftPan.includes(coinNum) || rightPan.includes(coinNum)) return null;
-                        const pos = getCoinPosition(coinNum);
-
-                        return (
-                            <motion.g
-                                key={`ground-${coinNum}`}
-                                animate={{ x: 0, y: 0 }}
-                                transition={{ type: "spring", stiffness: 200, damping: 25 }}
-                            >
-                                <circle
-                                    cx={pos.x}
-                                    cy={pos.y}
-                                    r="11"
-                                    fill={isSuccess && coinNum === fakeCoin ? "#ef4444" : isFailed && coinNum === fakeCoin ? "#ef4444" : "#F9DC34"}
-                                    stroke={isSuccess && coinNum === fakeCoin ? "#dc2626" : isFailed && coinNum === fakeCoin ? "#dc2626" : "#F5A623"}
-                                    strokeWidth="1.5"
-                                    opacity={isFailed && coinNum !== fakeCoin ? 0.4 : 0.9}
-                                />
-                                <text x={pos.x} y={pos.y + 4} textAnchor="middle" fontSize="10" fill="#2D1B4B" fontWeight="bold">
-                                    {coinNum}
-                                </text>
-                            </motion.g>
-                        );
-                    })}
-                </svg>
-            </motion.div>
-
-            <motion.span
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.6, delay: 0.5 }}
-                className="mx-10 my-6 text-center cursor-pointer text-gray-700 dark:text-gray-300 hover:text-[#F5A623] dark:hover:text-[#F9DC34] transition-colors"
-                onClick={() => setHelpModalOpen(true)}
-            >
-                Type <span className="font-mono bg-gray-100 dark:bg-gray-900/30 px-2 py-1 rounded">/help</span> to get commands and hints
-            </motion.span>
-
-            <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.6 }}
-                className="flex gap-2 w-full max-w-md"
-            >
-                <Input
-                    type="text"
-                    value={inputValue}
-                    onChange={handleInputChange}
-                    onKeyDown={(e) => { handleEnter(e); handleHistoryKeys(e); }}
-                    placeholder="Enter command..."
-                    className="border-gray-300 dark:border-gray-600/50 bg-white dark:bg-[#111111]/70 shadow-inner focus:ring-[#F5A623] focus:border-[#F9DC34]"
-                />
-                <button
-                    onClick={handleCommandSubmit}
-                    className="bg-gradient-to-r from-[#F9DC34] to-[#F5A623] hover:from-[#FFE55C] hover:to-[#FFBD4A] p-2 rounded-lg shadow-md transition-transform hover:scale-105 flex items-center justify-center w-12"
+            {/* Main Content Area */}
+            <div className="w-full max-w-2xl mb-6 flex flex-col gap-6">
+                {/* Visuals Panel */}
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.2 }}
+                    className="bg-white/5 backdrop-blur-sm border border-gray-700/50 rounded-xl p-8 shadow-xl flex flex-col items-center justify-center min-h-[300px]"
                 >
-                    <ArrowRight className="w-5 h-5 text-gray-900" />
-                </button>
-            </motion.div>
-
-            <AnimatePresence>
-                {isHelpModalOpen && (
-                    <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black bg-opacity-60 backdrop-blur-sm transition-opacity duration-300">
-                        <motion.div
-                            initial={{ scale: 0.9, opacity: 0 }}
-                            animate={{ scale: 1, opacity: 1 }}
-                            exit={{ scale: 0.9, opacity: 0 }}
-                            className="bg-white dark:bg-[#1A1A1A] rounded-xl overflow-hidden shadow-2xl max-w-md w-full mx-4 max-h-[80vh] flex flex-col"
-                        >
-                            <div className="p-6 overflow-y-auto flex-grow">
-                                <h2 className="text-2xl font-bold mb-4 text-gray-800 dark:text-[#F9DC34]">
-                                    Available Commands:
-                                </h2>
-                                <div className="space-y-1 mb-6">
-                                    <div className="bg-gray-50 dark:bg-gray-900/20 p-3 rounded-lg border-l-4 border-[#F5A623]">
-                                        <span className="font-bold text-gray-700 dark:text-gray-300">/weigh</span>{" "}
-                                        <span className="text-blue-600 dark:text-blue-300">[left] [right]</span>
-                                        <p className="mt-1 text-gray-600 dark:text-gray-300">Weigh two groups. e.g., /weigh 1,2,3 4,5,6</p>
+                    {!roomEntered ? (
+                        <div className="w-full flex flex-col items-center">
+                            <h3 className="text-[#F9DC34] text-lg font-mono mb-8 tracking-widest uppercase">Hallway Control Panel</h3>
+                            <div className="flex gap-12 mb-8">
+                                {["A", "B", "C"].map(label => (
+                                    <div key={label} className="flex flex-col items-center gap-3">
+                                        <div className={`w-16 h-24 rounded-lg border-4 transition-all duration-300 relative shadow-inner ${switches[label] ? "bg-[#F9DC34] border-[#F9DC34] shadow-[0_0_20px_#F9DC34]" : "bg-gray-800 border-gray-600"}`}>
+                                            <div className={`absolute w-full h-1/2 bg-black/20 ${switches[label] ? "bottom-0" : "top-0"}`} />
+                                        </div>
+                                        <span className="text-gray-400 font-bold font-mono text-xl">{label}</span>
+                                        <span className={`text-sm font-bold ${switches[label] ? "text-[#F9DC34]" : "text-gray-600"}`}>{switches[label] ? "ON" : "OFF"}</span>
                                     </div>
+                                ))}
+                            </div>
+                            <div className="text-center text-gray-500 text-sm italic border-t border-gray-700/50 pt-4 w-full">
+                                Switches can only be flipped here. Entering the room locks them.
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="w-full flex flex-col items-center">
+                            <h3 className="text-[#F9DC34] text-lg font-mono mb-6 tracking-widest uppercase">Inside The Room</h3>
 
-                                    <div className="bg-gray-50 dark:bg-gray-900/20 p-3 rounded-lg border-l-4 border-[#F5A623]">
-                                        <span className="font-bold text-gray-700 dark:text-gray-300">/guess</span>{" "}
-                                        <span className="text-blue-600 dark:text-blue-300">[coin]</span>
-                                        <p className="mt-1 text-gray-600 dark:text-gray-300">Guess the fake coin number.</p>
-                                    </div>
+                            {/* Bulb Visual */}
+                            <div className="relative mb-10">
+                                <Lightbulb
+                                    size={100}
+                                    className={`transition-all duration-500 ${switches[targetSwitch] ? "text-[#F9DC34] fill-[#F9DC34] drop-shadow-[0_0_50px_#F9DC34]" : "text-gray-700"}`}
+                                />
+                                {bulbTemp > 30 && !switches[targetSwitch] && (
+                                    <motion.div
+                                        animate={{ opacity: [0.3, 0.6, 0.3], scale: [1, 1.1, 1] }}
+                                        transition={{ repeat: Infinity, duration: 2 }}
+                                        className="absolute inset-0 bg-red-500/20 blur-2xl rounded-full scale-150"
+                                    />
+                                )}
+                            </div>
 
-                                    <div className="bg-gray-50 dark:bg-gray-900/20 p-3 rounded-lg border-l-4 border-[#F5A623]">
-                                        <span className="font-bold text-gray-700 dark:text-gray-300">/reset</span>
-                                        <p className="mt-1 text-gray-600 dark:text-gray-300">Reset the level.</p>
+                            {/* Feedback Indicators */}
+                            <div className="grid grid-cols-2 gap-4 w-full">
+                                <div className="bg-black/40 p-4 rounded-lg border border-gray-800 flex items-center gap-4">
+                                    <Lightbulb size={24} className={switches[targetSwitch] ? "text-[#F9DC34]" : "text-gray-500"} />
+                                    <div>
+                                        <div className="text-[10px] text-gray-500 uppercase tracking-wider">Light Status</div>
+                                        <div className={`text-base font-bold ${switches[targetSwitch] ? "text-[#F9DC34]" : "text-gray-400"}`}>
+                                            {switches[targetSwitch] ? "ILLUMINATED" : "DARK"}
+                                        </div>
                                     </div>
                                 </div>
+                                <div className="bg-black/40 p-4 rounded-lg border border-gray-800 flex items-center gap-4">
+                                    <Thermometer size={24} className={bulbTemp > 50 ? "text-red-500" : bulbTemp > 20 ? "text-orange-400" : "text-blue-400"} />
+                                    <div>
+                                        <div className="text-[10px] text-gray-500 uppercase tracking-wider">Thermal Scan</div>
+                                        <div className={`text-base font-bold ${bulbTemp > 50 ? "text-red-500" : bulbTemp > 20 ? "text-orange-400" : "text-blue-400"}`}>
+                                            {bulbTemp > 50 ? "HOT" : bulbTemp > 20 ? "WARM" : "COLD"}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </motion.div>
 
-                                <h3 className="text-xl font-bold mb-2 text-gray-800 dark:text-[#F9DC34]">
-                                    Hint:
-                                </h3>
-                                <p className="text-gray-600 dark:text-gray-300 italic">
-                                    Balance is truth, but the lighter soul is the liar. Three chances to weigh the world.
+
+
+                {/* Command Panel */}
+                <div className="flex flex-col items-center gap-3 w-full max-w-md mx-auto mt-2">
+                    <motion.span
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ duration: 0.6, delay: 0.5 }}
+                        className="text-sm text-center cursor-pointer text-gray-700 dark:text-gray-300 hover:text-[#F5A623] dark:hover:text-[#F9DC34] transition-colors"
+                        onClick={() => setHelpModalOpen(true)}
+                    >
+                        Type{" "}
+                        <span className="font-mono bg-gray-100 dark:bg-gray-900/30 px-2 py-1 rounded">
+                            /help
+                        </span>{" "}
+                        to get commands and hints
+                    </motion.span>
+
+                    {/* Command input */}
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.6, delay: 0.6 }}
+                        className="flex gap-2 w-full"
+                    >
+                        <Input
+                            type="text"
+                            value={inputValue}
+                            onChange={handleInputChange}
+                            onKeyDown={(e) => { handleEnter(e); handleHistoryKeys(e); }}
+                            placeholder="Enter command..."
+                            className="border-gray-300 dark:border-gray-600/50 bg-white dark:bg-[#111111]/70 shadow-inner focus:ring-[#F5A623] focus:border-[#F9DC34]"
+                        />
+                        <button
+                            onClick={handleCommandSubmit}
+                            className="bg-gradient-to-r from-[#F9DC34] to-[#F5A623] hover:from-[#FFE55C] hover:to-[#FFBD4A] p-2 rounded-lg shadow-md transition-transform hover:scale-105"
+                        >
+                            <Image
+                                src="/runcode.png"
+                                alt="Run"
+                                height={20}
+                                width={20}
+                                className="rounded-sm"
+                            />
+                        </button>
+                    </motion.div>
+                </div>
+            </div>
+
+
+            {/* Help Modal */}
+            {isHelpModalOpen && (
+                <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black bg-opacity-60 backdrop-blur-sm transition-opacity duration-300">
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="bg-white dark:bg-[#1A1A1A] rounded-xl overflow-hidden shadow-2xl max-w-md w-full mx-4 max-h-[80vh] flex flex-col"
+                    >
+                        <div className="p-6 overflow-y-auto flex-grow">
+                            <h2 className="text-2xl font-bold mb-4 text-gray-800 dark:text-[#F9DC34]">
+                                Available Commands:
+                            </h2>
+                            <div className="space-y-1 mb-6">
+                                <div className="bg-gray-50 dark:bg-gray-900/20 p-3 rounded-lg border-l-4 border-[#F5A623]">
+                                    <span className="font-bold text-gray-700 dark:text-gray-300">
+                                        /flip
+                                    </span>{" "}
+                                    <span className="text-blue-600 dark:text-blue-300">[A|B|C]</span>
+                                    <p className="mt-1 text-gray-600 dark:text-gray-300">
+                                        Toggle a switch ON or OFF. (Hallway only)
+                                    </p>
+                                </div>
+                                <div className="bg-gray-50 dark:bg-gray-900/20 p-3 rounded-lg border-l-4 border-[#F5A623]">
+                                    <span className="font-bold text-gray-700 dark:text-gray-300">
+                                        /wait
+                                    </span>{" "}
+                                    <span className="text-blue-600 dark:text-blue-300">[minutes]</span>
+                                    <p className="mt-1 text-gray-600 dark:text-gray-300">
+                                        Wait for time to pass. Affects bulb temperature.
+                                    </p>
+                                </div>
+                                <div className="bg-gray-50 dark:bg-gray-900/20 p-3 rounded-lg border-l-4 border-[#F5A623]">
+                                    <span className="font-bold text-gray-700 dark:text-gray-300">
+                                        /enter_room
+                                    </span>
+                                    <p className="mt-1 text-gray-600 dark:text-gray-300">
+                                        Lock switches and step inside to inspect the bulb.
+                                    </p>
+                                </div>
+                                <div className="bg-gray-50 dark:bg-gray-900/20 p-3 rounded-lg border-l-4 border-[#F5A623]">
+                                    <span className="font-bold text-gray-700 dark:text-gray-300">
+                                        /submit
+                                    </span>{" "}
+                                    <span className="text-blue-600 dark:text-blue-300">[A|B|C]</span>
+                                    <p className="mt-1 text-gray-600 dark:text-gray-300">
+                                        Identify which switch controls the bulb. (Room only)
+                                    </p>
+                                </div>
+                                <div className="bg-gray-50 dark:bg-gray-900/20 p-3 rounded-lg border-l-4 border-[#F5A623]">
+                                    <span className="font-bold text-gray-700 dark:text-gray-300">
+                                        /help
+                                    </span>
+                                    <p className="mt-1 text-gray-600 dark:text-gray-300">
+                                        Show available commands and hints.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <h3 className="text-xl font-bold mb-2 text-gray-800 dark:text-[#F9DC34]">
+                                How to solve:
+                            </h3>
+                            <div className="bg-gray-50 dark:bg-gray-900/20 p-4 rounded-lg border-l-4 border-blue-500 mb-6">
+                                <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
+                                    You&apos;re standing in a hallway with 3 switches (A, B, C). One of them controls a light bulb in a sealed room.<br className="mb-2" />
+                                    You can flip switches as many times as you want. But once you <span className="font-mono text-[#F5A623]">/enter_room</span>, the door LOCKS and you can&apos;t touch the switches.<br className="mb-2" />
+                                    <strong>Your goal:</strong> figure out WHICH switch (A, B, or C) controls the bulb.<br className="mb-2" />
+                                    <strong>Tip:</strong> The bulb gives off HEAT when it&apos;s been on. Use <span className="font-mono text-[#F5A623]">/wait</span> to let time pass. Then /enter_room and check if the bulb is lit, warm, or cold.
                                 </p>
                             </div>
 
-                            <div className="bg-gray-50 dark:bg-gray-900/30 px-6 py-4 text-center">
-                                <button
-                                    onClick={() => setHelpModalOpen(false)}
-                                    className="bg-gradient-to-r from-[#F9DC34] to-[#F5A623] hover:from-[#FFE55C] hover:to-[#FFBD4A] px-6 py-2 rounded-lg text-gray-900 font-medium shadow-md transition-transform hover:scale-105"
-                                >
-                                    Close
-                                </button>
-                            </div>
-                        </motion.div>
-                    </div>
-                )}
-            </AnimatePresence>
+                            <h3 className="text-xl font-bold mb-2 text-gray-800 dark:text-[#F9DC34]">
+                                Hint:
+                            </h3>
+                            <p className="text-gray-600 dark:text-gray-300 italic">
+                                The bulb gives off HEAT when it's been on. Use /wait to let time pass.
+                                Turn one switch ON and wait. Then turn it OFF, and turn a different switch ON.
+                                Enter the room — if the bulb is lit, it's the switch you left ON.
+                                If it's off but warm, it's the one you turned off. If it's cold, it's the third.
+                            </p>
+                        </div>
+
+                        <div className="bg-gray-50 dark:bg-gray-900/30 px-6 py-4 text-center flex-shrink-0">
+                            <button
+                                onClick={() => setHelpModalOpen(false)}
+                                className="bg-gradient-to-r from-[#F9DC34] to-[#F5A623] hover:from-[#FFE55C] hover:to-[#FFBD4A] px-6 py-2 rounded-lg text-gray-900 font-medium shadow-md transition-transform hover:scale-105"
+                            >
+                                Close
+                            </button>
+                        </div>
+                    </motion.div>
+                </div>
+            )}
         </div>
     );
 };

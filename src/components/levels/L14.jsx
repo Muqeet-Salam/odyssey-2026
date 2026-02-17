@@ -9,7 +9,7 @@ import { ArrowRight } from "lucide-react";
 
 const CORRECT_PIN = "0720"; // July 20 → 07/20
 
-const Level18 = ({ onComplete }) => {
+const Level14 = ({ onComplete }) => {
     const [inputValue, setInputValue] = useState("");
     const { pushCommand, handleKeyDown: handleHistoryKeys } = useCommandHistory(setInputValue);
     const [isHelpModalOpen, setHelpModalOpen] = useState(false);
@@ -267,4 +267,4 @@ const Level18 = ({ onComplete }) => {
     );
 };
 
-export default Level18;
+export default Level14;
