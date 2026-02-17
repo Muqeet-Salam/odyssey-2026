@@ -532,20 +532,10 @@ const Level8 = ({ onComplete }) => {
               </div>
 
               <h3 className="text-xl font-bold mb-2 text-gray-800 dark:text-[#F9DC34]">
-                Setup:
-              </h3>
-              <div className="space-y-1 mb-4 text-gray-600 dark:text-gray-300 text-sm">
-                <p>• A keypad lock with digits 0–9 and an Enter key.</p>
-                <p>• Three LED indicators: <strong>Num Lock</strong>, Caps Lock, Scroll Lock.</p>
-                <p>• A sticky note nearby shows a cryptic clue about the keypad.</p>
-                <p>• When you press number keys, nothing appears on the display...</p>
-              </div>
-
-              <h3 className="text-xl font-bold mb-2 text-gray-800 dark:text-[#F9DC34]">
                 Hint:
               </h3>
               <p className="text-gray-600 dark:text-gray-300 italic">
-                You're pressing the numbers… but nothing is appearing.
+                The keys are silent until the lock is broken. Find the spark to wake them.
               </p>
             </div>
 
