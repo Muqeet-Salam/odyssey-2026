@@ -479,6 +479,7 @@ const Level17 = ({ onComplete }) => {
                                         <span className="font-bold text-gray-700 dark:text-gray-300">/reset</span>
                                         <p className="mt-1 text-gray-600 dark:text-gray-300">Reset the level.</p>
                                     </div>
+                                </div>
 
                                 <h3 className="text-xl font-bold mb-2 text-gray-800 dark:text-[#F9DC34]">
                                     Hint:
