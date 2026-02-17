@@ -44,73 +44,6 @@ const Level2 = ({ onComplete }) => {
     }
   }, [isSuccess, onComplete, toast]);
 
-  const handleThemeChange = async (mode) => {
-    if (sunAnimating) return;
-    if ((mode === "dark" && isDarkScene) || (mode === "light" && !isDarkScene)) {
-      return;
-    }
-    setSunAnimating(true);
-    setHasObserved(true);
-
-    if (mode === "dark") {
-      setIsDarkScene(true);
-      // Sun sets, sunflower droops and petals close
-      await Promise.all([
-        sunControls.start({
-          y: [0, 160],
-          opacity: [1, 0],
-          transition: { duration: 2.5, ease: "easeInOut" },
-        }),
-        sunflowerControls.start({
-          rotate: [0, 20, 45],
-          transition: { duration: 2.5, ease: "easeInOut" },
-        }),
-        petalControls.start({
-          scale: [1, 0.5, 0.2],
-          transition: { duration: 2.5, ease: "easeInOut" },
-        }),
-        stemControls.start({
-          d: "M185,155 Q175,125 170,100",
-          transition: { duration: 2.5, ease: "easeInOut" },
-        }),
-      ]);
-      toast({
-        title: "🌙 Night falls",
-        description: "The sun has set... did any flower react to the change?",
-        variant: "default",
-      });
-    } else {
-      setIsDarkScene(false);
-      // Sun rises, sunflower perks up and petals open
-      await Promise.all([
-        sunControls.start({
-          y: [160, 0],
-          opacity: [0, 1],
-          transition: { duration: 2.5, ease: "easeInOut" },
-        }),
-        sunflowerControls.start({
-          rotate: [45, 20, 0],
-          transition: { duration: 2.5, ease: "easeInOut" },
-        }),
-        petalControls.start({
-          scale: [0.2, 0.5, 1],
-          transition: { duration: 2.5, ease: "easeInOut" },
-        }),
-        stemControls.start({
-          d: "M185,155 Q185,125 185,95",
-          transition: { duration: 2.5, ease: "easeInOut" },
-        }),
-      ]);
-      toast({
-        title: "☀️ Dawn breaks",
-        description: "The sun has risen... did any flower react to the light?",
-        variant: "default",
-      });
-    }
-
-    setSunAnimating(false);
-  };
-
   const handleInputChange = (e) => {
     setInputValue(e.target.value);
   };
@@ -125,14 +58,11 @@ const Level2 = ({ onComplete }) => {
     pushCommand(inputValue);
     const cmd = inputValue.trim().toLowerCase();
 
-    const themeMatch = cmd.match(/^\/theme\s+(dark|light)$/i);
     const enterMatch = cmd.match(/^\/enter\s+(.+)$/i);
     const resetMatch = cmd.match(/^\/reset$/i);
     const helpMatch = cmd.match(/^\/help$/i);
 
-    if (themeMatch) {
-      handleThemeChange(themeMatch[1].toLowerCase());
-    } else if (enterMatch) {
+    if (enterMatch) {
       const answer = enterMatch[1].trim().toLowerCase();
       if (answer === "sunflower") {
         setIsSuccess(true);
@@ -424,20 +354,7 @@ const Level2 = ({ onComplete }) => {
             )}
           </AnimatePresence>
 
-          {/* Instruction overlay if not observed yet */}
-          {!hasObserved && (
-            <text
-              x="200"
-              y="188"
-              textAnchor="middle"
-              fontSize="11"
-              fill="white"
-              opacity="0.8"
-              fontWeight="bold"
-            >
-              Use /theme dark or /theme light
-            </text>
-          )}
+
         </svg>
       </motion.div>
 
@@ -503,16 +420,6 @@ const Level2 = ({ onComplete }) => {
                 Available Commands:
               </h2>
               <div className="space-y-1 mb-6">
-                <div className="bg-gray-50 dark:bg-gray-900/20 p-3 rounded-lg border-l-4 border-[#F5A623]">
-                  <span className="font-bold text-gray-700 dark:text-gray-300">
-                    /theme
-                  </span>{" "}
-                  <span className="text-blue-600 dark:text-blue-300">[dark/light]</span>
-                  <p className="mt-1 text-gray-600 dark:text-gray-300">
-                    Switch between day and night. Watch the garden closely.
-                  </p>
-                </div>
-
                 <div className="bg-gray-50 dark:bg-gray-900/20 p-3 rounded-lg border-l-4 border-[#F5A623]">
                   <span className="font-bold text-gray-700 dark:text-gray-300">
                     /enter

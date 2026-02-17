@@ -165,7 +165,7 @@ const Game = () => {
         <>
           <button
             onClick={() => setSelectedLevel(null)}
-            className="fixed top-4 left-4 z-50 px-4 py-2 bg-gray-700 hover:bg-gray-600 text-gray-100 font-semibold rounded-lg shadow-lg"
+            className="fixed top-16 left-4 z-50 px-4 py-2 bg-gray-700 hover:bg-gray-600 text-gray-100 font-semibold rounded-lg shadow-lg"
           >
             ← Back to Levels
           </button>

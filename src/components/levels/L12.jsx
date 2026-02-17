@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { Input } from "@/components/ui/input";
-import { useTheme } from "next-themes";
 import { motion, AnimatePresence } from "framer-motion";
 import { HelpCircle, ArrowRight, Clock } from "lucide-react";
 import { useToast } from "../ui/use-toast";
@@ -11,7 +10,6 @@ const TimekeepersLevel = ({ levelNumber, onComplete, nextLevelNumber }) => {
   const [currentTime, setCurrentTime] = useState("8:46");
   const [isSuccess, setIsSuccess] = useState(false);
 
-  const { theme, setTheme } = useTheme();
   const { toast } = useToast();
 
   const timeToMinutes = (timeStr) => {
@@ -70,22 +68,12 @@ const TimekeepersLevel = ({ levelNumber, onComplete, nextLevelNumber }) => {
   const handleCommandSubmit = () => {
     const resetMatch = inputValue.match(/^\/reset$/i);
     const helpMatch = inputValue.match(/^\/help$/i);
-    const themeMatch = inputValue.match(/^\/theme\s+(dark|light)$/i);
     const moveMatch = inputValue.match(/^\/move\s+([+-]\d+h?\d*m?)$/i);
     
     if (resetMatch) {
       resetGame();
     } else if (helpMatch) {
       setHelpModalOpen(true);
-    } else if (themeMatch) {
-      const newTheme = themeMatch[1];
-      setTheme(newTheme);
-      toast({
-        title: "Theme Changed",
-        description: `Theme set to ${newTheme} mode`,
-        variant: "default",
-        className: "fixed bottom-12 left-1/2 transform -translate-x-1/2 z-50 bg-white dark:bg-[#1A1A1A] opacity-100 shadow-lg",
-      });
     } else if (moveMatch) {
       const move = moveMatch[1];
       
