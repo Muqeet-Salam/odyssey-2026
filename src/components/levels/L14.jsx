@@ -118,23 +118,15 @@ const Level14 = ({ onComplete }) => {
                 }
             }
         } else if (submitMatch) {
-            if (!located) {
+            const guess = submitMatch[1].trim().toLowerCase();
+            if (CORRECT_ANSWERS.includes(guess)) {
+                setIsSuccess(true);
+            } else {
                 toast({
-                    title: "No visual data",
-                    description: "You need to /scan and /locate first to recover the image.",
+                    title: "Incorrect ❌",
+                    description: `"${submitMatch[1].trim()}" is not the landmark. Look at the image carefully.`,
                     variant: "destructive"
                 });
-            } else {
-                const guess = submitMatch[1].trim().toLowerCase();
-                if (CORRECT_ANSWERS.includes(guess)) {
-                    setIsSuccess(true);
-                } else {
-                    toast({
-                        title: "Incorrect ❌",
-                        description: `"${submitMatch[1].trim()}" is not the landmark. Look at the image carefully.`,
-                        variant: "destructive"
-                    });
-                }
             }
         } else if (hintMatch) {
             setHintUsed(true);
@@ -274,59 +266,13 @@ const Level14 = ({ onComplete }) => {
                             >
                                 <p className="text-[#4ADE80] text-xs mb-2">▸ VISUAL DATA RECOVERED</p>
                                 <div className="border border-[#333] rounded-lg overflow-hidden bg-[#0d0d1a]">
-                                    {/* SVG illustration of Hollywood Sign */}
-                                    <svg viewBox="0 0 380 180" className="w-full">
-                                        {/* Sky gradient */}
-                                        <defs>
-                                            <linearGradient id="sky18" x1="0" y1="0" x2="0" y2="1">
-                                                <stop offset="0%" stopColor="#1a237e" />
-                                                <stop offset="50%" stopColor="#3949ab" />
-                                                <stop offset="100%" stopColor="#7986cb" />
-                                            </linearGradient>
-                                        </defs>
-                                        <rect x="0" y="0" width="380" height="180" fill="url(#sky18)" />
-
-                                        {/* Hills/mountains */}
-                                        <polygon points="0,130 50,95 100,110 160,80 220,100 280,75 340,95 380,85 380,180 0,180" fill="#2E7D32" opacity="0.3" />
-                                        <polygon points="0,140 40,120 90,130 140,105 200,115 250,95 310,110 350,100 380,110 380,180 0,180" fill="#388E3C" opacity="0.5" />
-                                        <polygon points="0,155 60,135 120,145 180,125 240,140 300,120 350,135 380,130 380,180 0,180" fill="#43A047" opacity="0.7" />
-
-                                        {/* Hollywood Sign letters */}
-                                        {["H", "O", "L", "L", "Y", "W", "O", "O", "D"].map((letter, i) => {
-                                            const x = 60 + i * 30;
-                                            const y = 120 + Math.sin(i * 0.5) * 5;
-                                            return (
-                                                <text
-                                                    key={`hl${i}`}
-                                                    x={x}
-                                                    y={y}
-                                                    textAnchor="middle"
-                                                    fontSize="28"
-                                                    fill="white"
-                                                    fontWeight="bold"
-                                                    fontFamily="serif"
-                                                    opacity="0.95"
-                                                    style={{ textShadow: "1px 1px 2px rgba(0,0,0,0.5)" }}
-                                                >
-                                                    {letter}
-                                                </text>
-                                            );
-                                        })}
-
-                                        {/* Ground */}
-                                        <polygon points="0,155 380,145 380,180 0,180" fill="#33691E" opacity="0.6" />
-
-                                        {/* Scan lines overlay */}
-                                        {[...Array(18)].map((_, i) => (
-                                            <line key={`sl${i}`} x1={0} y1={i * 10} x2={380} y2={i * 10} stroke="#000" strokeWidth="0.3" opacity="0.15" />
-                                        ))}
-
-                                        {/* Image label */}
-                                        <rect x="5" y="5" width="100" height="14" rx="3" fill="#000" opacity="0.5" />
-                                        <text x="55" y="15" textAnchor="middle" fontSize="7" fill="#4ADE80" fontFamily="monospace">
-                                            📸 SAT IMAGE — LA
-                                        </text>
-                                    </svg>
+                                    <Image
+                                        src="/hwood.jpeg"
+                                        alt="Hollywood Sign"
+                                        width={760}
+                                        height={360}
+                                        className="w-full h-auto"
+                                    />
                                 </div>
                                 <p className="text-gray-500 text-xs mt-2">
                                     Use <span className="text-gray-400">/submit [landmark name]</span> to identify it.

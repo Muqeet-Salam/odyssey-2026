@@ -6,8 +6,6 @@ import { Input } from "@/components/ui/input";
 import { motion } from "framer-motion";
 import { useToast } from "../ui/use-toast";
 import { useCommandHistory } from "@/hooks/useCommandHistory";
-import { MoonIcon, SunIcon } from "@radix-ui/react-icons";
-import { useTheme } from "next-themes";
 
 const CORRECT_NAME = "rick astley";
 
@@ -22,7 +20,6 @@ const Level13 = ({ onComplete }) => {
     const progressRef = useRef(null);
     const audioRef = useRef(null);
     const { toast } = useToast();
-    const { theme, setTheme } = useTheme();
 
     // Initialize audio on mount
     useEffect(() => {
@@ -49,16 +46,27 @@ const Level13 = ({ onComplete }) => {
         }
     }, [isSuccess, onComplete, toast]);
 
-    // Progress bar animation when playing
+    // Progress bar synced to actual audio playback
     useEffect(() => {
-        if (isPlaying) {
+        const audio = audioRef.current;
+
+        if (isPlaying && audio) {
             progressRef.current = setInterval(() => {
-                setProgress((p) => (p >= 100 ? 0 : p + 0.5));
+                const duration = Number.isFinite(audio.duration) && audio.duration > 0 ? audio.duration : 213;
+                const nextProgress = (audio.currentTime / duration) * 100;
+                setProgress(Math.min(100, Math.max(0, nextProgress)));
             }, 100);
-        } else {
+        } else if (progressRef.current) {
             clearInterval(progressRef.current);
+            progressRef.current = null;
         }
-        return () => clearInterval(progressRef.current);
+
+        return () => {
+            if (progressRef.current) {
+                clearInterval(progressRef.current);
+                progressRef.current = null;
+            }
+        };
     }, [isPlaying]);
 
     const handleInputChange = (e) => {
@@ -79,98 +87,110 @@ const Level13 = ({ onComplete }) => {
     };
 
     const handleCommandSubmit = () => {
-        pushCommand(inputValue);
-        const cmd = inputValue.trim().toLowerCase();
+    pushCommand(inputValue);
+    const cmd = inputValue.trim().toLowerCase();
+    const playMatch = cmd.match(/^\/play$/i);
+    const stopMatch = cmd.match(/^\/stop$/i);
+    const viewMatch = cmd.match(/^\/view\s+details$/i);
+    const enterMatch = cmd.match(/^\/enter\s+(.+)$/i);
+    const resetMatch = cmd.match(/^\/reset$/i);
+    const helpMatch = cmd.match(/^\/help$/i);
+    const secretMatch = cmd.match(/^\/\?\?$/i);
 
-        const playMatch = cmd.match(/^\/play$/i);
-        const stopMatch = cmd.match(/^\/stop$/i);
-        const viewMatch = cmd.match(/^\/view\s+details$/i);
-        const enterMatch = cmd.match(/^\/enter\s+(.+)$/i);
-        const resetMatch = cmd.match(/^\/reset$/i);
-        const helpMatch = cmd.match(/^\/help$/i);
-
-        if (playMatch) {
-            if (isPlaying) {
-                toast({
-                    title: "Already playing 🎶",
-                    description: "The music is already playing...",
-                    variant: "default"
-                });
-            } else {
-                setIsPlaying(true);
+    if (playMatch) {
+      if (isPlaying) {
+        toast({
+          title: "Already playing 🎶",
+          description: "The music is already playing...",
+          variant: "default",
+        });
+      } else {
                 if (audioRef.current) {
-                    audioRef.current.play().catch(() => { });
+                    audioRef.current.play().catch(() => {
+                        toast({
+                            title: "Playback blocked",
+                            description: "Press the command button again to start audio playback.",
+                            variant: "destructive",
+                        });
+                    });
                 }
-                toast({
-                    title: "▶ Now Playing",
-                    description: "♪ Never Gonna Give You Up ♪",
-                    variant: "default"
-                });
-            }
-        } else if (stopMatch) {
-            if (!isPlaying) {
-                toast({
-                    title: "Already stopped ⏹",
-                    description: "The music is not playing.",
-                    variant: "default"
-                });
-            } else {
-                setIsPlaying(false);
-                setProgress(0);
+        setIsPlaying(true);
+        toast({
+          title: "▶ Now Playing",
+          description: "playing the song",
+          variant: "default",
+        });
+      }
+    } else if (stopMatch) {
+      if (!isPlaying) {
+        toast({
+          title: "Already stopped ⏹",
+          description: "The music is not playing.",
+          variant: "default",
+        });
+      } else {
+        setIsPlaying(false);
+        setProgress(0);
                 if (audioRef.current) {
                     audioRef.current.pause();
                     audioRef.current.currentTime = 0;
-                }
-                toast({
-                    title: "⏹ Stopped",
-                    description: "Music stopped.",
-                    variant: "default"
-                });
-            }
-        } else if (viewMatch) {
-            setDetailsViewed(true);
-            toast({
-                title: "Track Details 📋",
-                description: "Title: Never Gonna Give You Up\nArtist: R. Astley\nAlbum: Whenever You Need Somebody\nYear: 1987\nGenre: Pop/Dance",
-                variant: "default"
-            });
-        } else if (enterMatch) {
-            const guess = enterMatch[1].trim().toLowerCase();
-            if (guess === CORRECT_NAME) {
-                setIsSuccess(true);
-            } else {
-                toast({
-                    title: "Wrong name ❌",
-                    description: `"${enterMatch[1].trim()}" is not correct. Check the artist info.`,
-                    variant: "destructive"
-                });
-            }
-        } else if (resetMatch) {
-            setIsPlaying(false);
-            setDetailsViewed(false);
-            setProgress(0);
-            setIsSuccess(false);
+        }
+        toast({
+          title: "⏹ Stopped",
+          description: "Music stopped.",
+          variant: "default",
+        });
+      }
+    } else if (viewMatch) {
+      setDetailsViewed(true);
+      toast({
+        title: "Track Details 📋",
+        description: "Title: Never Gonna Give You Up\nArtist: R. Astley\nAlbum: Whenever You Need Somebody\nYear: 1987\nGenre: Pop/Dance",
+        variant: "default",
+    });
+    } else if (enterMatch) {
+      const guess = enterMatch[1].trim().toLowerCase();
+      if (guess === CORRECT_NAME) {
+        setIsSuccess(true);
+      } else {
+        toast({
+          title: "Wrong name ❌",
+          description: `"${enterMatch[1].trim()}" is not correct. Check the artist info.`,
+          variant: "destructive",
+        });
+      }
+    } else if (resetMatch) {
+      setIsPlaying(false);
+      setDetailsViewed(false);
+      setProgress(0);
+      setIsSuccess(false);
             if (audioRef.current) {
                 audioRef.current.pause();
                 audioRef.current.currentTime = 0;
-            }
-            toast({
-                title: "Level Reset",
-                description: "Music player restored.",
-                variant: "default"
-            });
-        } else if (helpMatch) {
-            setHelpModalOpen(true);
-        } else {
-            toast({
-                title: "Unknown Command",
-                description: "Type /help to see available commands",
-                variant: "destructive"
-            });
-        }
+      }
+      toast({
+        title: "Level Reset",
+        description: "Music player restored.",
+        variant: "default",
+    });
+    } else if (secretMatch) {
+      toast({
+        title: "Good Luck",
+        description: "There is no escape from the rhythm.",
+        variant: "default",
+    });
+    } else if (helpMatch) {
+      setHelpModalOpen(true);
+    } else {
+      toast({
+        title: "Unknown Command",
+        description: "Type /help to see available commands",
+        variant: "destructive",
+    });
+    }
 
-        setInputValue("");
-    };
+    setInputValue("");
+  };
 
     const closeHelpModal = () => {
         setHelpModalOpen(false);
@@ -392,14 +412,9 @@ const Level13 = ({ onComplete }) => {
                                         Play the track.
                                     </p>
                                 </div>
-
                                 <div className="bg-gray-50 dark:bg-gray-900/20 p-3 rounded-lg border-l-4 border-[#F5A623]">
-                                    <span className="font-bold text-gray-700 dark:text-gray-300">
-                                        /stop
-                                    </span>
-                                    <p className="mt-1 text-gray-600 dark:text-gray-300">
-                                        Stop the track.
-                                    </p>
+                                    <span className="font-bold text-gray-700 dark:text-gray-300">/??</span>
+                                    <p className="mt-1 text-gray-600 dark:text-gray-300">Good luck.</p>
                                 </div>
 
                                 <div className="bg-gray-50 dark:bg-gray-900/20 p-3 rounded-lg border-l-4 border-[#F5A623]">
@@ -426,7 +441,7 @@ const Level13 = ({ onComplete }) => {
                                         /reset
                                     </span>
                                     <p className="mt-1 text-gray-600 dark:text-gray-300">
-                                        Reset the level.
+                                        Attempt to restore sanity.
                                     </p>
                                 </div>
 
