@@ -28,6 +28,7 @@ import Level14 from "@/components/levels/L14";
 import Level15 from "@/components/levels/L15";
 import Level16 from "@/components/levels/L16";
 import Level17 from "@/components/levels/L17";
+import level18 from "@/components/levels/L18";
 /*
 */
 
@@ -49,6 +50,7 @@ const levels = [
   Level15,
   Level16,
   Level17,
+  level18,
   /*
   */  
 ];
@@ -115,25 +117,14 @@ const Game = () => {
     else if (status !== "loading") router.push("/");
   }, [status]);
 
+  useEffect(() => {
+    if (userDet?.CL > staticData.maxLevel) {
+      router.push("/");
+    }
+  }, [userDet, router]);
+
   if (loading || !userDet) {
     return <div className="h-screen flex items-center justify-center">Loading...</div>;
-  }
-
-  if (userDet?.CL > staticData.maxLevel) {
-    return (
-      <div className="flex items-center justify-center h-screen bg-gradient-to-b from-[#1A1A1A] to-[#111111]">
-        <div className="text-center p-6 bg-white/5 backdrop-blur-md rounded-lg shadow-lg border border-gray-700/30">
-          <h2 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-[#F9DC34] to-[#F5A623]">Well played</h2>
-          <p className="text-gray-300">Come back soon for more levels!</p>
-          <button
-            onClick={() => router.push("/")}
-            className="mt-4 px-6 py-2 bg-gradient-to-r from-[#F9DC34] to-[#F5A623] text-gray-900 font-bold rounded-lg shadow-lg hover:from-[#FFE55C] hover:to-[#FFBD4A]"
-          >
-            Return Home
-          </button>
-        </div>
-      </div>
-    );
   }
 
   const CurrentLevel = levels[userDet?.CL - 1];

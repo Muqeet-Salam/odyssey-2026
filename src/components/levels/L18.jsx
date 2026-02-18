@@ -574,7 +574,7 @@ const Level17 = ({ onComplete }) => {
       </motion.div>
 
       {/* Sticky Command Panel */}
-      <div className="sticky bottom-0 left-0 right-0 z-40 bg-gradient-to-t from-purple-50/95 via-purple-50/90 to-transparent dark:from-[#1A0F2E] dark:via-[#1A0F2E]/95 dark:to-transparent backdrop-blur-sm border-t border-purple-300/30 dark:border-purple-500/20 py-4 mt-8">
+      <div className="sticky bottom-0 left-0 right-0 z-40 backdrop-blur-sm border-t border-purple-300/30 dark:border-purple-500/20 py-4 mt-8">
         <div className="flex flex-col items-center gap-3 max-w-4xl mx-auto px-4">
           <motion.span
             initial={{ opacity: 0 }}
@@ -691,8 +691,7 @@ const Level17 = ({ onComplete }) => {
               </h3>
               <p className="text-gray-600 dark:text-gray-300 italic">
                 Lore: The bridge only holds if every stone is touched once. Choose a start, cross every stone, and return to where you began.
-                Hint: Start at A4. A good opening is A4 {" -> "} C3 {" -> "} A2 {" -> "} C1. If you later reach B1, you're close to closing the loop.
-              </p>
+                Hint: Start at B1</p>
             </div>
 
             <div className="bg-purple-50 dark:bg-purple-900/30 px-6 py-4 text-center flex-shrink-0">

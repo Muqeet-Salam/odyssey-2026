@@ -12,7 +12,7 @@ import { staticData } from "@/lib/staticdata";
 import { motion } from "framer-motion";
 
 // Floating particle component
-const Particle = ({ delay, duration, x, size }) => (
+const Particle = ({ delay, duration, x, size, variant = "base" }) => (
   <motion.div
     className="absolute rounded-full"
     style={{
@@ -20,16 +20,19 @@ const Particle = ({ delay, duration, x, size }) => (
       height: size,
       left: `${x}%`,
       bottom: -20,
-      background: `radial-gradient(circle, rgba(249,220,52,${0.15 + Math.random() * 0.2}) 0%, transparent 70%)`,
+      background:
+        variant === "celebration"
+          ? `radial-gradient(circle, rgba(255,239,153,${0.3 + Math.random() * 0.35}) 0%, rgba(255,180,64,${0.2 + Math.random() * 0.25}) 45%, transparent 75%)`
+          : `radial-gradient(circle, rgba(249,220,52,${0.15 + Math.random() * 0.2}) 0%, transparent 70%)`,
     }}
     animate={{
       y: [0, -window?.innerHeight || -800],
-      x: [0, (Math.random() - 0.5) * 120],
-      opacity: [0, 0.8, 0.6, 0],
-      scale: [0.5, 1.2, 0.8, 0.3],
+      x: [0, (Math.random() - 0.5) * (variant === "celebration" ? 220 : 120)],
+      opacity: variant === "celebration" ? [0, 1, 0.9, 0] : [0, 0.8, 0.6, 0],
+      scale: variant === "celebration" ? [0.6, 1.6, 1.2, 0.4] : [0.5, 1.2, 0.8, 0.3],
     }}
     transition={{
-      duration,
+      duration: variant === "celebration" ? duration * 0.8 : duration,
       delay,
       repeat: Infinity,
       ease: "easeOut",
@@ -106,6 +109,8 @@ const Home = () => {
     }
   }, [session]);
   
+  const isCelebration = userDet?.CL > staticData.maxLevel;
+
   return (
     <div className="min-h-screen flex flex-col items-center bg-gradient-to-b from-[#1A1A1A] to-[#111111] overflow-hidden relative">
 
@@ -140,13 +145,14 @@ const Home = () => {
 
       {/* Floating particles */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {Array.from({ length: 225 }).map((_, i) => (
+        {Array.from({ length: isCelebration ? 320 : 225 }).map((_, i) => (
           <Particle
             key={i}
             delay={i * 0.1}
-            duration={5 + Math.random() * 7}
+            duration={5 + Math.random() * (isCelebration ? 5 : 7)}
             x={2 + (i / 45) * 96}
-            size={2 + Math.random() * 5}
+            size={2 + Math.random() * (isCelebration ? 8 : 5)}
+            variant={isCelebration ? "celebration" : "base"}
           />
         ))}
       </div>
