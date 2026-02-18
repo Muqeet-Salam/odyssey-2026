@@ -88,6 +88,8 @@ const Level17 = ({ onComplete }) => {
             handleEnterRoom();
         } else if (lowerCmd.startsWith("/submit ")) {
             handleSubmit(lowerCmd.split(" ")[1]);
+        } else if (lowerCmd === "/reset") {
+            handleReset();
         } else {
             addLog(`> Unknown command: ${cmd}`);
             toast({
@@ -207,7 +209,26 @@ const Level17 = ({ onComplete }) => {
                 description: "Logic flaw detected. Sequence failed.",
                 variant: "destructive",
             });
+            // Reset the game on wrong answer
+            setTimeout(() => {
+                handleReset();
+            }, 2000);
         }
+    };
+
+    const handleReset = () => {
+        const targets = ["A", "B", "C"];
+        const randomTarget = targets[Math.floor(Math.random() * targets.length)];
+        setTargetSwitch(randomTarget);
+        setSwitches({ A: false, B: false, C: false });
+        setRoomEntered(false);
+        setBulbTemp(0);
+        addLog("> Level reset. All switches are OFF. Ready to try again.");
+        toast({
+            title: "Level Reset",
+            description: "Try again with a new configuration.",
+            variant: "default",
+        });
     };
 
     return (
@@ -397,6 +418,14 @@ const Level17 = ({ onComplete }) => {
                                     <span className="text-blue-600 dark:text-blue-300">[A|B|C]</span>
                                     <p className="mt-1 text-gray-600 dark:text-gray-300">
                                         Identify which switch controls the bulb. (Room only)
+                                    </p>
+                                </div>
+                                <div className="bg-gray-50 dark:bg-gray-900/20 p-3 rounded-lg border-l-4 border-[#F5A623]">
+                                    <span className="font-bold text-gray-700 dark:text-gray-300">
+                                        /reset
+                                    </span>
+                                    <p className="mt-1 text-gray-600 dark:text-gray-300">
+                                        Reset the level and start over with a new switch configuration.
                                     </p>
                                 </div>
                                 <div className="bg-gray-50 dark:bg-gray-900/20 p-3 rounded-lg border-l-4 border-[#F5A623]">
