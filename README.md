@@ -1,3 +1,5 @@
 ### Odyssey 2026
 
-Production repository for Odyssey 2026, a two-day online puzzle hunt organized by the CBIT Open Source Community (COSC). This is the original codebase that powered the live event, serving 550+ participants through interactive command-line, logic, and technical challenges with real-time progression. After the event, the codebase was migrated to the official COSC repository.
+This repository contains the production codebase that I developed and maintained for Odyssey 2026, a two-day online puzzle hunt organized by the CBIT Open Source Community (COSC). I was responsible for the production deployment, participant registration system, database management, and ensuring the platform ran smoothly throughout the event, which hosted 550+ participants.
+
+https://github.com/cbitosc/OpenSys26-Odyssey
